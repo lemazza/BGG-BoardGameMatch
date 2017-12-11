@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Boardgame Selector API</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+</head>
+<body>
+  <form id="query-form">
+    <label for="bgg-user">Board Game Geek User Name</label>
+      <input type="text" id="bgg-user" value="ghapptest">
+    <label for="player-number">Number of Players</label>
+      <input type="number" id="player-number">
+    <label for="diff-level">Difficulty Level</label>
+      <input id="diff-level">
+    <label for="playtime">Max Gamelength in Minutes</label>
+      <input type="number" id="playtime">
+    <button type="submit">Submit</button>
+  </form>
+
+  <div class="results">
+    <div class="game">
+      <img class="thumbnail"><h2>Game name</h2><p>description graph</p>
+      <div class="expansion">
+        <a>rules</a>
+        <a>amazon</a>
+        <a>youtube</a>
+      </div>
+    </div>
+    <div class="game">
+      <img class="thumbnail"><h2>Game name</h2><p>description graph</p>
+    </div>
+    <div class="game">
+      <img class="thumbnail"><h2>Game name</h2><p>description graph</p>
+    </div>
+  </div>
+  <script type="text/javascript" src="index.js"></script>
+</body>
+</html>
