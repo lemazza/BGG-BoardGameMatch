@@ -1,15 +1,13 @@
 
 function renderResult (item) {
   console.log(item);
-  console.log(item.description)
+  console.log(item.description);
 return `
       <li class="result-item">
-        <h3>${item.name}</h3>
-        <img src="${item.thumbnail}">
-        <p>${item.description}</p>
-
+        <h3 class="game-name">${item.name}</h3>
+        <img src="${item.thumbnail}" alt="${item.name}">
+        <p class="game-description">${item.description}</p>
       </li>
-
       `;
 };
 
