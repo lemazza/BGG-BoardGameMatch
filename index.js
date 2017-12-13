@@ -76,12 +76,15 @@ function watchSubmit () {
    bggUserName = $('#bgg-user').val();
  
   $.ajax({
-    url: `https://www.boardgamegeek.com/xmlapi2/collection?username=${bggUserName}&own=1&stats=1`,
+    url: `https://www.boardgamegeek.com/xmlapi2/collection`,
     type: "GET",
     dataType: "xml",
     subtype: "boardgame",
+    data: {
+    username: $('#bgg-user').val(),
     stats: "1",
     own: "1",
+    },
     maxTime: $('#playtime').val(),
     playerNum: $('#player-number').val(),
     diffLevel: $('#diff-level').val(),
