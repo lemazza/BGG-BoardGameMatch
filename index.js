@@ -59,7 +59,10 @@ function handleResults (data) {
   const xmlDoc = $.parseXML( data );
   const $xml = $( xmlDoc );
   const $items =$xml.find( "items" );
-  $items.each(x=>console.log(x))
+  console.log('here are items: ', $items);
+  $items.each(function(x){
+    console.log("this is this: ", this)
+  })
   //docItems = document.getElementById("item");
  // docItems.innerHTML = xmlDoc.getElementsByTagName("name").getAttribute('value');
   //const CollectionReadyForDisplay = filterAndSortCollection(fullCollectionData, this.maxTime, this.playerNum, this.diffLevel);
