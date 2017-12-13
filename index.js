@@ -86,8 +86,8 @@ function watchSubmit () {
     subtype: "boardgame",
     data: {
     username: $('#bgg-user').val(),
-    stats: "1",
-    own: "1",
+    stats: 1,
+    own: 1,
     },
     maxTime: $('#playtime').val(),
     playerNum: $('#player-number').val(),
