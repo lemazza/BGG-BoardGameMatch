@@ -59,8 +59,8 @@ function handleResults (data) {
   xmlDoc = $.parseXML( data );
   $xml = $( xmlDoc );
   $title = $xml.find( "item" ).val();
-  docItems = document.getElementById("item");
-  docItems.innerHTML = xmlDoc.getElementsByTagName("name").getAttribute('value');
+  //docItems = document.getElementById("item");
+ // docItems.innerHTML = xmlDoc.getElementsByTagName("name").getAttribute('value');
   console.log(data);
   //const CollectionReadyForDisplay = filterAndSortCollection(fullCollectionData, this.maxTime, this.playerNum, this.diffLevel);
   //console.log(CollectionReadyForDisplay);
