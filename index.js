@@ -1,3 +1,6 @@
+const UserCollection = [];
+
+
 
 function renderResult (item) {
   console.log(item);
@@ -24,11 +27,12 @@ $('.results-list').html("").append(results);
 
 function filterAndSortCollection (collectionArray, timeFilter, playerFilter, difficultyFilter) {
   const newArray = collectionArray
-                    .filter(x=> x.owned === true)
-                    .filter(x=> x.isExpansion === false)
-                    .filter(x=> x.playingTime <= timeFilter)
-                    .filter(x=> x.minPlayers <= playerFilter && x.maxPlayers >= playerFilter)
-                    .filter(x=> x.rank > 0)//maybe reinclude these games with more robust sort
+                    .filter(x=> x.owned === true 
+                      && x.isExpansion === false 
+                      && x.playingTime <= timeFilter 
+                      && x.minPlayers <= playerFilter 
+                      && x.maxPlayers >= playerFilter 
+                      && x.rank > 0)//maybe reinclude these games with more robust sort
                     .sort((a,b)=> a.rank - b.rank);
                    //still needs weight filter
                    console.log("newArray 2nd description = "+ newArray[1].description);
@@ -52,12 +56,17 @@ function addMoreGameInfo (element) {
 
 function handleResults (data) {
   //why can't I just have fullCollectionData  = my data.map expression??
-  data.map(element => addMoreGameInfo(element));
-  const fullCollectionData  = data;   
-
-  const CollectionReadyForDisplay = filterAndSortCollection(fullCollectionData, this.maxTime, this.playerNum, this.diffLevel);
-  console.log(CollectionReadyForDisplay);
-  displayResults(CollectionReadyForDisplay);
+  //data.map(element => addMoreGameInfo(element));
+  //const fullCollectionData  = data;   
+  xmlDoc = $.parseXML( data );
+  $xml = $( xmlDoc );
+  $title = $xml.find( "item" ).val();
+  docItems = document.getElementById("item");
+  docItems.innerHTML = xmlDoc.getElementsByTagName("name").getAttribute('value');
+  console.log(data);
+  //const CollectionReadyForDisplay = filterAndSortCollection(fullCollectionData, this.maxTime, this.playerNum, this.diffLevel);
+  //console.log(CollectionReadyForDisplay);
+  //displayResults(CollectionReadyForDisplay);
 };
 
 
@@ -66,20 +75,15 @@ function watchSubmit () {
   $('#query-form').submit(event => {
     event.preventDefault();
   
-   bggUserinput = $('#bgg-user').val();
+   bggUserName = $('#bgg-user').val();
  
-
-    //const query = {
-     // owned: "1",
-    //  maxPlayers: "2"
-    //};
-    //$.getJSON(`https://bgg-json.azurewebsites.net/collection/${bggUser}`, query, handleResults);
-
   $.ajax({
-    url: `https://bgg-json.azurewebsites.net/collection/${bggUserinput}`,
+    url: `https://www.boardgamegeek.com/xmlapi2/collection?username=${bggUserName}&own=1&stats=1`,
     type: "GET",
-    dataType: "json",
-    bggUser: bggUserinput,
+    dataType: "xml",
+    subtype: "boardgame",
+    stats: "1",
+    own: "1",
     maxTime: $('#playtime').val(),
     playerNum: $('#player-number').val(),
     diffLevel: $('#diff-level').val(),
