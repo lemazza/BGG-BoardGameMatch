@@ -59,9 +59,9 @@ function handleResults (data) {
   console.log(data);
   const xmlDoc = $.parseXML( data );
   const $xml = $( xmlDoc );
-  const $items =$xml.find( "items item" );
+  const $items =$xml.find( "items" );
   console.log('here are items: ', $items);
-  $items.each(function(x){
+  $items.children().each(function(x){
     console.log("this is this: ", this)
   })
   //docItems = document.getElementById("item");
