@@ -1,6 +1,6 @@
 const UserCollection = [];
 
-
+const TempData = 
 
 function renderResult (item) {
   console.log(item);
@@ -56,14 +56,12 @@ function handleResults (data) {
   //why can't I just have fullCollectionData  = my data.map expression??
   //data.map(element => addMoreGameInfo(element));
   //const fullCollectionData  = data;   
-  console.log('max time is ' + this.maxTime);
+  console.log(data);
   const xmlDoc = $.parseXML( data );
   const $xml = $( xmlDoc );
   const $items =$xml.find( "items" );
-  console.log('here are items: ', $items);
-  //$items.children().each(function(x){
-    console.log("this is this: ", this)
-  })
+  console.log('here are items: ', $items.text());
+  //$items.children().each(function(x){console.log("this is this: ", this)})
   //docItems = document.getElementById("item");
  // docItems.innerHTML = xmlDoc.getElementsByTagName("name").getAttribute('value');
   //const CollectionReadyForDisplay = filterAndSortCollection(fullCollectionData, this.maxTime, this.playerNum, this.diffLevel);
