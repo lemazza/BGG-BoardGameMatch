@@ -56,12 +56,12 @@ function handleResults (data) {
   //why can't I just have fullCollectionData  = my data.map expression??
   //data.map(element => addMoreGameInfo(element));
   //const fullCollectionData  = data;   
-  console.log(data);
+  console.log('max time is ' + this.maxTime);
   const xmlDoc = $.parseXML( data );
   const $xml = $( xmlDoc );
   const $items =$xml.find( "items" );
   console.log('here are items: ', $items);
-  $items.children().each(function(x){
+  //$items.children().each(function(x){
     console.log("this is this: ", this)
   })
   //docItems = document.getElementById("item");
