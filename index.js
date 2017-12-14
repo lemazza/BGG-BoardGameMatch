@@ -99,7 +99,7 @@ function watchSubmit () {
   $('#query-form').submit(event => {
     event.preventDefault();
   $.ajax({
-    url: `https://www.boardgamegeek.com/xmlapi2/collection`,
+    url: 'https://www.boardgamegeek.com/xmlapi2/collection',
     type: "GET",
     dataType: "xml",
     data: {
@@ -116,5 +116,5 @@ function watchSubmit () {
 };
 
 
-$(handleResults(TempData));
+//$(handleResults(TempData));
 $(watchSubmit);
