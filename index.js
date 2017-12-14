@@ -105,7 +105,6 @@ function watchSubmit () {
     dataType: "xml",
     subtype: "boardgame",
     data: {
-      subtype: "boardgame",
       username: $('#bgg-user').val(),
       stats: 1,
       own: 1,
