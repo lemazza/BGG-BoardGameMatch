@@ -79,8 +79,10 @@ function createGameArrayFromXML (xmlData) {
 
 function handleResults (data) {
 // Create object array from xml data
+console.log(data);
   var childrenArray = createGameArrayFromXML(data);
   console.log('children array ', childrenArray);
+  console.log('UserCollection is ', UserCollection);
 //filter array
   filteredArray = filterByCollectionParameters(childrenArray, this.maxTimeParameter, this.playerNumParameter)
   console.log('filtered array ', filteredArray);
@@ -96,14 +98,10 @@ function handleResults (data) {
 function watchSubmit () {
   $('#query-form').submit(event => {
     event.preventDefault();
-  
-   bggUserName = $('#bgg-user').val();
- 
   $.ajax({
     url: `https://www.boardgamegeek.com/xmlapi2/collection`,
     type: "GET",
     dataType: "xml",
-    subtype: "boardgame",
     data: {
       username: $('#bgg-user').val(),
       stats: 1,
