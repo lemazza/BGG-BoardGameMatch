@@ -56,6 +56,7 @@ function findMoreGameInfo (element) {
 
 function gameObjectCreator (xmlItem) {
   //get individual xml item and create object and push it to usercollection
+  console.log('gameObjectCreator says xmlItem is ', xmlItem);
   let game= {
     gameId: $(xmlItem).attr("objectid"),
     name: $(xmlItem).find('name').text(),
@@ -72,8 +73,11 @@ function gameObjectCreator (xmlItem) {
 
 function createGameArrayFromXML (xmlData) {
   const xmlDoc = $.parseXML( xmlData );
+  console.log('xmlDoc is ', xmlDoc)
   const $xml = $( xmlDoc );
+  console.log('$xml is', $xml)
   const $items =$xml.find( "items" );
+  console.log('$items is ', $items);
   return Array.from($items.children(),gameObjectCreator)
 }
 
