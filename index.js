@@ -44,7 +44,7 @@ function findMoreGameInfo (element) {
     type: "GET",
     dataType: "xml",
     data: {
-      gameId: element.gameId
+      id: element.gameId
     },
     success:  function(data) {
     element.description = data.description;
@@ -80,10 +80,10 @@ function createGameArrayFromXML (xmlData) {
 function handleResults (data) {
 // Create object array from xml data
   var childrenArray = createGameArrayFromXML(data);
-  console.log(childrenArray);
+  console.log('children array ', childrenArray);
 //filter array
-  filteredArray = filterByCollectionParameters(childrenArray, 300, 1)
-  console.log(filteredArray);
+  filteredArray = filterByCollectionParameters(childrenArray, this.maxTimeParameter, this.playerNumParameter)
+  console.log('filtered array ', filteredArray);
 //add info to games in array
   filteredArray.map(findMoreGameInfo);
 //display array
