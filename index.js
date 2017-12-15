@@ -30,11 +30,15 @@ function filterByCollectionParameters (collectionArray, timeFilter, playerFilter
                       && x.rank > 0)
 };
 
+
+
 function addMoreGameInfo(data) {
     element.description = data.description;
     element.playerPollResults = data.playerPollResults;
     element.weight = data.weight
   };
+
+
 
 function findMoreGameInfo (element) {
   //given a gameId, this function searches for that "thing" and returns its 
@@ -54,6 +58,8 @@ function findMoreGameInfo (element) {
  });
 };
 
+
+
 function gameObjectCreator (xmlItem) {
   //get individual xml item and create object and push it to usercollection
   console.log('gameObjectCreator says xmlItem is ', xmlItem);
@@ -65,11 +71,12 @@ function gameObjectCreator (xmlItem) {
     maxPlayers: $(xmlItem).find("stats").attr("maxplayers"),
     playTime: $(xmlItem).find("stats").attr("playingtime"),
     rank: $(xmlItem).find("rank").attr('value')
-
   }
   UserCollection.push(game);
   return game;
 }
+
+
 
 function createGameArrayFromXML (xmlData) {
   const xmlDoc = $.parseXML( xmlData );
@@ -81,9 +88,11 @@ function createGameArrayFromXML (xmlData) {
   return Array.from($items.children(),gameObjectCreator)
 }
 
+
+
 function handleResults (data) {
 // Create object array from xml data
-console.log(data);
+  console.log(data);
   var childrenArray = createGameArrayFromXML(data);
   console.log('children array ', childrenArray);
   console.log('UserCollection is ', UserCollection);
@@ -102,7 +111,7 @@ console.log(data);
 function watchSubmit () {
   $('#query-form').submit(event => {
     event.preventDefault();
-  $.ajax({
+  $.when($.ajax({
     url: 'https://www.boardgamegeek.com/xmlapi2/collection',
     type: "GET",
     dataType: "xml",
@@ -114,8 +123,8 @@ function watchSubmit () {
     maxTimeParameter: $('#playtime').val(),
     playerNumParameter: $('#player-number').val(),
     diffLevelParameter: $('#diff-level').val(),
-    success: handleResults  
-    })
+    //success: handleResults  
+    })).done(handleResults);
   })
 };
 
