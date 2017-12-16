@@ -62,7 +62,6 @@ function findMoreGameInfo (element) {
 
 function gameObjectCreator (xmlItem) {
   //get individual xml item and create object and push it to usercollection
-  console.log('gameObjectCreator says xmlItem is ', xmlItem);
   let game= {
     gameId: $(xmlItem).attr("objectid"),
     name: $(xmlItem).find('name').text(),
@@ -80,11 +79,8 @@ function gameObjectCreator (xmlItem) {
 
 function createGameArrayFromXML (xmlData) {
   const xmlDoc = $.parseXML( xmlData );
-  console.log('xmlDoc is ', xmlDoc)
   const $xml = $( xmlDoc );
-  console.log('$xml is', $xml)
   const $items =$xml.find( "items" );
-  console.log('$items is ', $items);
   return Array.from($items.children(),gameObjectCreator)
 }
 
@@ -93,7 +89,7 @@ function createGameArrayFromXML (xmlData) {
 function handleResults (data) {
 // Create object array from xml data
   console.log(data);
-  var childrenArray = createGameArrayFromXML(data);
+  let childrenArray = createGameArrayFromXML(data);
   console.log('children array ', childrenArray);
   console.log('UserCollection is ', UserCollection);
 //filter array
@@ -111,22 +107,29 @@ function handleResults (data) {
 function watchSubmit () {
   $('#query-form').submit(event => {
     event.preventDefault();
-  $.when($.ajax({
-    url: 'https://www.boardgamegeek.com/xmlapi2/collection',
-    type: "GET",
-    dataType: "xml",
-    data: {
-      username: $('#bgg-user').val(),
-      stats: 1,
-      own: 1,
-    },
-    maxTimeParameter: $('#playtime').val(),
-    playerNumParameter: $('#player-number').val(),
-    diffLevelParameter: $('#diff-level').val(),
-    //success: handleResults  
-    })).done(handleResults);
-  })
-};
+    $.ajax({
+      url: 'https://www.boardgamegeek.com/xmlapi2/collection',
+      type: "GET",
+      dataType: "xml",
+      data: {
+        username: $('#bgg-user').val(),
+        stats: 1,
+        own: 1,
+        },
+      maxTimeParameter: $('#playtime').val(),
+      playerNumParameter: $('#player-number').val(),
+      diffLevelParameter: $('#diff-level').val(),
+      //success: handleResults  
+    }).done(function(data) {
+      let $xml = $(data);
+      let $items = $xml.find('items');
+      newArray = Array.from($items.children(), gameObjectCreator);
+    }).then(function(){
+      let filteredCollection = filterByCollectionParameters(UserCollection,$('#playtime').val(),$('#player-number').val());
+      console.log(filteredCollection);
+      })
+  });
+}
 
 
 //$(handleResults(TempData));
