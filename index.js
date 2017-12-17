@@ -4,10 +4,13 @@ let DisplayCollection = [];
 
 const TempData = '<items totalitems="4" termsofuse="http://boardgamegeek.com/xmlapi/termsofuse" pubdate="Wed, 13 Dec 2017 19:31:43 +0000"><item objecttype="thing" objectid="31260" subtype="boardgame" collid="47571802"><name sortindex="1">Agricola</name><yearpublished>2007</yearpublished><stats minplayers="1" maxplayers="5" minplaytime="30" maxplaytime="150" playingtime="150" numowned="61658"><rating value="N/A"><usersrated value="51092"/><average value="8.03861"/><bayesaverage value="7.94123"/><stddev value="1.56252"/><median value="0"/><ranks><rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="15" bayesaverage="7.94123"/><rank type="family" id="5497" name="strategygames" friendlyname="Strategy Game Rank" value="15" bayesaverage="7.92355"/></ranks></rating></stats>  <status own="1" prevowned="0" fortrade="0" want="0" wanttoplay="0" wanttobuy="0" wishlist="0" preordered="0" lastmodified="2017-12-11 00:33:21"/><numplays>0</numplays></item><item objecttype="thing" objectid="178900" subtype="boardgame" collid="47571809"><name sortindex="1">Codenames</name><yearpublished>2015</yearpublished><stats minplayers="2" maxplayers="8" minplaytime="15" maxplaytime="15" playingtime="15" numowned="57721"><rating value="N/A"><usersrated value="36542"/><average value="7.83777"/><bayesaverage value="7.74049"/><stddev value="1.25618"/><median value="0"/><ranks><rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="35" bayesaverage="7.74049"/><rank type="family" id="5498" name="partygames" friendlyname="Party Game Rank" value="1" bayesaverage="7.77027"/></ranks></rating></stats><status own="1" prevowned="0" fortrade="0" want="0" wanttoplay="0" wanttobuy="0" wishlist="0" preordered="0" lastmodified="2017-12-11 00:33:47"/><numplays>0</numplays></item></items>'
 
+let weightFilter = 1;
+
+
 function renderResult (item) {
 return `
       <li class="result-item">
-        <h3 class="game-name">${item.name}</h3>
+        <h3 class="game-name">#${item.rank}: ${item.name}</h3>
         <img src="${item.thumbnail}" alt="${item.name}">
         <p class="game-description">${item.description}</p>
       </li>
@@ -50,14 +53,19 @@ function getMoreGameInfo (element) {
     data: {
       id: element.gameId,
       stats: 1
-    },
-    success:  function(data) {
-    element.description = $(data).find("description").text();
+    }
+    
+ }).done(function(data){
+  element.description = $(data).find("description").text();
     //element.playerPollResults = $(data).find("description").text();
     element.weight = $(data).find("averageweight").attr("value");
-    DisplayCollection.push(element);
-    }
- });
+ }).then(function(){
+      DisplayCollection.push(element);
+      console.log('god, hopefully diff level', weightFilter);
+      DisplayCollection.filter(x=>x.weight<= weightFilter+.25
+                                &&x.weight>= weightFilter+.25)
+      displayResults(DisplayCollection);
+ })
 };
 
 
@@ -71,7 +79,7 @@ function gameObjectCreator (xmlItem) {
     minPlayers: $(xmlItem).find("stats").attr("minplayers"),
     maxPlayers: $(xmlItem).find("stats").attr("maxplayers"),
     playTime: $(xmlItem).find("stats").attr("playingtime"),
-    rank: $(xmlItem).find("rank").attr('value')
+    rank: Number($(xmlItem).find("rank").attr('value'))
   }
   UserCollection.push(game);
   return game;
@@ -103,7 +111,9 @@ function handleResults (data) {
 };
   
 
-
+function compareByRank (a, b) {
+  return a.rank - b.rank
+}
 
 
 function watchSubmit () {
@@ -111,6 +121,7 @@ function watchSubmit () {
     event.preventDefault();
     UserCollection = [];
     DisplayCollection = [];
+    weightFilter = $('#diff-level').val();
     $.ajax({
       url: 'https://www.boardgamegeek.com/xmlapi2/collection',
       type: "GET",
@@ -131,9 +142,8 @@ function watchSubmit () {
     }).then(function(){
       let filteredCollection = filterByCollectionParameters(UserCollection,$('#playtime').val(),$('#player-number').val());
       console.log(filteredCollection);
-      filteredCollection.sort((a,b)=>a.rank-b.rank).forEach(getMoreGameInfo);
-    }).then(function(){
-      displayResults(DisplayCollection);
+      filteredCollection.sort((a,b)=>a.rank - b.rank).forEach(getMoreGameInfo);
+      console.log('filtered and sorted collection for display', DisplayCollection);
     })
   });
 }
