@@ -2,9 +2,34 @@ let UserCollection = [];
 
 let DisplayCollection = [];
 
-const TempData = '<items totalitems="4" termsofuse="http://boardgamegeek.com/xmlapi/termsofuse" pubdate="Wed, 13 Dec 2017 19:31:43 +0000"><item objecttype="thing" objectid="31260" subtype="boardgame" collid="47571802"><name sortindex="1">Agricola</name><yearpublished>2007</yearpublished><stats minplayers="1" maxplayers="5" minplaytime="30" maxplaytime="150" playingtime="150" numowned="61658"><rating value="N/A"><usersrated value="51092"/><average value="8.03861"/><bayesaverage value="7.94123"/><stddev value="1.56252"/><median value="0"/><ranks><rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="15" bayesaverage="7.94123"/><rank type="family" id="5497" name="strategygames" friendlyname="Strategy Game Rank" value="15" bayesaverage="7.92355"/></ranks></rating></stats>  <status own="1" prevowned="0" fortrade="0" want="0" wanttoplay="0" wanttobuy="0" wishlist="0" preordered="0" lastmodified="2017-12-11 00:33:21"/><numplays>0</numplays></item><item objecttype="thing" objectid="178900" subtype="boardgame" collid="47571809"><name sortindex="1">Codenames</name><yearpublished>2015</yearpublished><stats minplayers="2" maxplayers="8" minplaytime="15" maxplaytime="15" playingtime="15" numowned="57721"><rating value="N/A"><usersrated value="36542"/><average value="7.83777"/><bayesaverage value="7.74049"/><stddev value="1.25618"/><median value="0"/><ranks><rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="35" bayesaverage="7.74049"/><rank type="family" id="5498" name="partygames" friendlyname="Party Game Rank" value="1" bayesaverage="7.77027"/></ranks></rating></stats><status own="1" prevowned="0" fortrade="0" want="0" wanttoplay="0" wanttobuy="0" wishlist="0" preordered="0" lastmodified="2017-12-11 00:33:47"/><numplays>0</numplays></item></items>'
-
 let weightFilter = 1;
+
+if(typeof $ !== 'undefined' && $.ajax) $.ajax.multiple = function(requests, responseCallback, failureCallback){
+  const responseObjects = [];
+  // $.when() will take any number of promises as arguments, and trigger a callback function when all the promises complete.
+  // But first we must translate our URLs or settings objects into actual $.ajax request promises (deferreds).
+  // And before we call ajax, we need to add a failure function to catch 404 not found errors which would otherwise stop the whole batch.
+  const handle404 = function(error, ){
+    
+  }
+  const promises = requests.map(x=>$.ajax(x));
+  
+  // Since we want to accept an array of an arbitrary number of promises, we use Function.prototype.apply() to call the function using an array to populate the arguments list rather than having to name the arguments one at a time.
+  return $.when.apply(this, promises).then(function(){
+    
+    // translate "array-like" `arguments` object into an actual array so our clients can use array methods on the response
+    for( let i=0; i < arguments.length; i++ ){
+      let response = arguments[i];
+      if( Array.isArray(response) ){ response = response[0]; }
+      responseObjects.push(response);
+    }
+    // Once all arguments have been pushed onto our array, we can pass it to the provided callback function.
+    responseCallback(responseObjects);
+  }).fail(function(error){
+    console.log("failure response:", JSON.stringify(error));
+  });
+}
+
 
 
 function renderResult (item) {
@@ -12,7 +37,10 @@ return `
       <li class="result-item">
         <h3 class="game-name">#${item.rank}: ${item.name}</h3>
         <img src="${item.thumbnail}" alt="${item.name}">
-        <p class="game-description">${item.description}</p>
+        <p class="game-description short">${item.shortDescription}</p>
+        <button class="display-more-info">More Information</button>
+        <div class="extra-info" hidden>
+        </div>
       </li>
       `;
 };
@@ -30,7 +58,7 @@ function filterByCollectionParameters (collectionArray, timeFilter, playerFilter
   return collectionArray.filter(x=>x.playTime <= timeFilter 
                       && x.minPlayers <= playerFilter 
                       && x.maxPlayers >= playerFilter 
-                      && x.rank > 0)
+                      && x.rank > 0);
 };
 
 
@@ -43,45 +71,54 @@ function addMoreGameInfo(data) {
 
 
 
-function getMoreGameInfo (element) {
+function getMoreGameInfo (array) {
   //given a gameId, this function searches for that "thing" and returns its 
-  //description and player poll results and appends it to object
-  $.ajax({
-    url: `https://www.boardgamegeek.com/xmlapi2/thing`,
-    type: "GET",
-    dataType: "xml",
-    data: {
-      id: element.gameId,
-      stats: 1
+  //description, weight, and player poll results and appends it to object
+  console.log('array is ', array);
+  let settingsObjects = array.map(function(element){
+    return {
+      url: `https://www.boardgamegeek.com/xmlapi2/thing`,
+      type: "GET",
+      dataType: "xml",
+      data: {
+        id: element.gameId,
+        stats: 1,
+        videos: 1
+      }
     }
+  });
+  $.ajax.multiple(settingsObjects, function(elements){
+    console.log('elements inside ajax multiple', elements);
+    elements.forEach(function(data){
+      console.log('element is ', element)
+      element.description = $(data).find("description").text();
+      element.shortDescription = $(data).find("description").text().slice(0,250) + "..."
+      //element.playerPollResults = $(data).find("description").text();
+      element.weight = $(data).find("averageweight").attr("value");
+      videoAddress = $(data).find('video').attr('link');
+      element.video = videoAddress.replace("watch?v=", "embed/");
     
- }).done(function(data){
-  element.description = $(data).find("description").text();
-    //element.playerPollResults = $(data).find("description").text();
-    element.weight = $(data).find("averageweight").attr("value");
- }).then(function(){
-      DisplayCollection.push(element);
-      console.log('god, hopefully diff level', weightFilter);
-      DisplayCollection.filter(x=>x.weight<= weightFilter+.25
-                                &&x.weight>= weightFilter+.25)
+      console.log('wf is now ', weightFilter);
+      DisplayCollection.filter(x=>x.weight<= weightFilter +.25
+                                &&x.weight>= weightFilter -.25)
       displayResults(DisplayCollection);
- })
-};
+    });
+  });
+}
 
 
 
-function gameObjectCreator (xmlItem) {
+function gameObjectCreator (index, xmlItem) {
   //get individual xml item and create object and push it to usercollection
   let game= {
     gameId: $(xmlItem).attr("objectid"),
     name: $(xmlItem).find('name').text(),
     thumbnail: $(xmlItem).find('thumbnail').text(),
-    minPlayers: $(xmlItem).find("stats").attr("minplayers"),
-    maxPlayers: $(xmlItem).find("stats").attr("maxplayers"),
-    playTime: $(xmlItem).find("stats").attr("playingtime"),
-    rank: Number($(xmlItem).find("rank").attr('value'))
+    minPlayers: Number($(xmlItem).find("stats").attr("minplayers")),
+    maxPlayers: Number($(xmlItem).find("stats").attr("maxplayers")),
+    playTime: Number($(xmlItem).find("stats").attr("playingtime")),
+    rank: Number($(xmlItem).find("rank").attr('value')),
   }
-  UserCollection.push(game);
   return game;
 }
 
@@ -111,9 +148,6 @@ function handleResults (data) {
 };
   
 
-function compareByRank (a, b) {
-  return a.rank - b.rank
-}
 
 
 function watchSubmit () {
@@ -122,6 +156,8 @@ function watchSubmit () {
     UserCollection = [];
     DisplayCollection = [];
     weightFilter = $('#diff-level').val();
+    (console.log('weight filter is ', weightFilter));
+    $('.results-list').html("");
     $.ajax({
       url: 'https://www.boardgamegeek.com/xmlapi2/collection',
       type: "GET",
@@ -129,25 +165,55 @@ function watchSubmit () {
       data: {
         username: $('#bgg-user').val(),
         stats: 1,
-        own: 1,
+        own: 1
         },
       maxTimeParameter: $('#playtime').val(),
       playerNumParameter: $('#player-number').val(),
       diffLevelParameter: $('#diff-level').val(),
-      //success: handleResults  
     }).done(function(data) {
-      let $xml = $(data);
-      let $items = $xml.find('items');
-      newArray = Array.from($items.children(), gameObjectCreator);
-    }).then(function(){
-      let filteredCollection = filterByCollectionParameters(UserCollection,$('#playtime').val(),$('#player-number').val());
-      console.log(filteredCollection);
-      filteredCollection.sort((a,b)=>a.rank - b.rank).forEach(getMoreGameInfo);
-      console.log('filtered and sorted collection for display', DisplayCollection);
+      let $items = $(data).find('items');
+      let gameObjectList = $items.children().map(gameObjectCreator)
+      //gameObjectList is an object and needs to be an array to filter
+      var newArray = $.map(gameObjectList, function(value, index) {return [value]});
+      let filteredCollection = filterByCollectionParameters(newArray,Number($('#playtime').val()),Number($('#player-number').val()));
+      let sortedCollection = filteredCollection.sort((a,b)=>a.rank - b.rank);
+      getMoreGameInfo(sortedCollection)
     })
   });
 }
 
+function watchMoreInfoClick () {
+  $('.results-list').on('click', '.display-more-info', function() {
+    event.stopPropagation;
+    $(this).closest('li').find('.extra-info').toggle();
+    gameName = $(this).closest('li').find('img').attr('alt');
+    gameVidAddress = DisplayCollection.find(x=>x.name===gameName).video;
+    $(this).closest('li').find('.extra-info').html(
+      `<iframe width="420" height="315" src="${gameVidAddress}"></iframe>`)
+  })
+};
+
+function displayFullDescription () {
+  $('.results-list').on('click','.game-description', function() {
+    gameName = $(this).closest('li').find('img').attr('alt');
+    fullDescription = DisplayCollection.find(x=>x.name===gameName).description;
+    shortDescription = DisplayCollection.find(x=>x.name===gameName).shortDescription;
+    descriptionArea = $(this).closest('li').find('.game-description');
+    console.log(descriptionArea.text());
+    console.log(shortDescription);
+    (descriptionArea.text() === (shortDescription) )? descriptionArea.text(fullDescription) : descriptionArea.text(shortDescription);
+  })
+}
+
+
+
+
+
+
+
+
 
 //$(handleResults(TempData));
 $(watchSubmit);
+$(watchMoreInfoClick);
+$(displayFullDescription);
