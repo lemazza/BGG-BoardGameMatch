@@ -36,6 +36,7 @@ function renderResult (item) {
 return `
       <li class="result-item">
         <h3 class="game-name">#${item.rank}: ${item.name}</h3>
+        <p>Weight: ${item.weight}</p>
         <img src="${item.thumbnail}" alt="${item.name}">
         <p class="game-description short">${item.shortDescription}</p>
         <button class="display-more-info">More Information</button>
@@ -74,8 +75,7 @@ function addMoreGameInfo(data) {
 function getMoreGameInfo (array) {
   //given a gameId, this function searches for that "thing" and returns its 
   //description, weight, and player poll results and appends it to object
-  let DisplayCollection = [];
-  console.log('getMoreGameInfo array is ', array);
+  DisplayCollection = [];
   let settingsObjects = array.map(function(element){
     return {
       url: `https://www.boardgamegeek.com/xmlapi2/thing`,
@@ -97,7 +97,6 @@ function getMoreGameInfo (array) {
   $.ajax.multiple(settingsObjects, function(elements){
     elements.forEach(function(data) {
       let game = {}
-      console.log('data is ', data)
       game.description = $(data).find("description").text();
       game.shortDescription = $(data).find("description").text().slice(0,250) + "..."
       //game.playerPollResults = $(data).find("description").text();
@@ -115,19 +114,16 @@ function getMoreGameInfo (array) {
       game.rank = Number($(data).find("rank").attr('value'));
       DisplayCollection.push(game);
       DisplayCollection.sort((a,b)=>(a.rank - b.rank));
-      console.log('disp coll ', DisplayCollection);
-      console.log('dispcoll is type ', typeof DisplayCollection);
     });
-  }).then(function(){
-    /* console.log('wf is now ', weightFilter);
+    console.log('wf is now ', weightFilter);
+    console.log('wf type', typeof weightFilter);
     weightMax = weightFilter + .25;
     weightMin = weightFilter - .25;
-    DisplayCollection.filter(x=>x.weight<= weightMax
-                              &&x.weight>= weightMin)*/
-    console.log(DisplayCollection);
-
-    displayResults(DisplayCollection);
-  })
+    console.log('max/min', weightMax, weightMin);
+    finalCollection = DisplayCollection.filter(x=>x.weight<= weightMax
+                              &&x.weight>= weightMin);
+    displayResults(finalCollection);
+  });
 };
 
 
@@ -179,7 +175,7 @@ function watchSubmit () {
     event.preventDefault();
     UserCollection = [];
     DisplayCollection = [];
-    weightFilter = $('#diff-level').val();
+    weightFilter = Number($('#diff-level').val());
     //(console.log('weight filter is ', weightFilter));
     $('.results-list').html("");
     $.ajax({
@@ -223,8 +219,6 @@ function displayFullDescription () {
     fullDescription = DisplayCollection.find(x=>x.name===gameName).description;
     shortDescription = DisplayCollection.find(x=>x.name===gameName).shortDescription;
     descriptionArea = $(this).closest('li').find('.game-description');
-    console.log(descriptionArea.text());
-    console.log(shortDescription);
     (descriptionArea.text() === (shortDescription) )? descriptionArea.text(fullDescription) : descriptionArea.text(shortDescription);
   })
 }
