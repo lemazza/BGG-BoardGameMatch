@@ -38,7 +38,8 @@ return `
         <h3 class="game-name">#${item.rank}: ${item.name}</h3>
         <p>Weight: ${item.weight}</p>
         <img src="${item.thumbnail}" alt="${item.name}">
-        <p class="game-description short">${item.shortDescription}</p>
+        <p class="game-description short" >${item.shortDescription}</p>
+        <p class="game-description full" hidden>${item.description}</p>
         <button class="display-more-info">More Information</button>
         <div class="extra-info" hidden>
         </div>
@@ -102,7 +103,8 @@ function getMoreGameInfo (array) {
       //game.playerPollResults = $(data).find("description").text();
       game.weight = Number($(data).find("averageweight").attr("value"));
       videoAddress = $(data).find('video').attr('link');
-      game.video = videoAddress.replace("watch?v=", "embed/");
+      if(videoAddress) {
+      game.video = videoAddress.replace("watch?v=", "embed/");}
       //this next bit feels like redundant code
       game.gameId = $(data).find("item").attr("id"),
       game.name = $(data).find('name').attr("value");
@@ -166,6 +168,7 @@ function handleResults (data) {
   filteredArray.map(findMoreGameInfo);
 //display array
 };
+
   
 
 
@@ -215,11 +218,23 @@ function watchMoreInfoClick () {
 
 function displayFullDescription () {
   $('.results-list').on('click','.game-description', function() {
-    gameName = $(this).closest('li').find('img').attr('alt');
-    fullDescription = DisplayCollection.find(x=>x.name===gameName).description;
-    shortDescription = DisplayCollection.find(x=>x.name===gameName).shortDescription;
-    descriptionArea = $(this).closest('li').find('.game-description');
-    (descriptionArea.text() === (shortDescription) )? descriptionArea.text(fullDescription) : descriptionArea.text(shortDescription);
+    if($(this).hasClass('full')) {
+      $(this).closest('li').find('.game-description.short').prop("hidden", false);
+    } else {
+      $(this).closest('li').find('.game-description.full').prop("hidden", false);
+    }
+    $(this).prop("hidden", true);
+  })
+}
+
+function watchSlider () {
+  $('input[type="range"]').change(function(event) {
+// get id of label
+const labelID = $(this).attr('aria-labeled-by');
+// get value of range
+const rangeValue = $(this).val();
+// set label value to range value
+$("#" + labelID).text(rangeValue);
   })
 }
 
@@ -229,9 +244,8 @@ function displayFullDescription () {
 
 
 
-
-
 //$(handleResults(TempData));
+$(watchSlider);
 $(watchSubmit);
 $(watchMoreInfoClick);
 $(displayFullDescription);

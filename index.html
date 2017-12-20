@@ -9,10 +9,10 @@
   <form id="query-form">
     <label for="bgg-user">Board Game Geek User Name</label>
       <input type="text" id="bgg-user" value="lemazza"><br>
-    <label for="player-number">Number of Players</label>
-      <input type="range" min="1" max="12" value="2" class="slider" id="player-number" value="6"><br>
-    <label for="diff-level">Difficulty Level</label>
-      <input type="range" min="1" max="5" value="1" step=".25" class="slider" id="diff-level"><br>
+    <label for="player-number">Number of Players: </label><label id="num-label">2</label><br>
+      <input type="range" min="1" max="12" value="2" class="slider" id="player-number" value="6" aria-labeled-by="num-label"><br>
+    <label for="diff-level">Difficulty Level: </label><label id="diff-label">1.25</label><br>
+      <input type="range" min="1" max="5" value="1.25" step=".25" class="slider" id="diff-level" aria-labeled-by="diff-label"><br>
     <label for="playtime" >Max Gamelength in Minutes</label>
       <input type="number" id="playtime" value="30"><br>
     <button type="submit">Submit</button>
