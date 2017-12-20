@@ -74,7 +74,8 @@ function addMoreGameInfo(data) {
 function getMoreGameInfo (array) {
   //given a gameId, this function searches for that "thing" and returns its 
   //description, weight, and player poll results and appends it to object
-  console.log('array is ', array);
+  let DisplayCollection = [];
+  console.log('getMoreGameInfo array is ', array);
   let settingsObjects = array.map(function(element){
     return {
       url: `https://www.boardgamegeek.com/xmlapi2/thing`,
@@ -84,27 +85,50 @@ function getMoreGameInfo (array) {
         id: element.gameId,
         stats: 1,
         videos: 1
-      }
+      },
+      gameIdPrime: element.gameId,
+      thumbnailPrime: element.thumbnail,
+      minPlayersPrime: element.minPlayers,
+      maxPlayersPrime: element.maxPlayers,
+      playTimePrime: element.playTime,
+      rankPrime: element.rank
     }
   });
   $.ajax.multiple(settingsObjects, function(elements){
-    console.log('elements inside ajax multiple', elements);
-    elements.forEach(function(data){
-      console.log('element is ', element)
-      element.description = $(data).find("description").text();
-      element.shortDescription = $(data).find("description").text().slice(0,250) + "..."
-      //element.playerPollResults = $(data).find("description").text();
-      element.weight = $(data).find("averageweight").attr("value");
+    elements.forEach(function(data) {
+      let game = {}
+      console.log('data is ', data)
+      game.description = $(data).find("description").text();
+      game.shortDescription = $(data).find("description").text().slice(0,250) + "..."
+      //game.playerPollResults = $(data).find("description").text();
+      game.weight = Number($(data).find("averageweight").attr("value"));
       videoAddress = $(data).find('video').attr('link');
-      element.video = videoAddress.replace("watch?v=", "embed/");
-    
-      console.log('wf is now ', weightFilter);
-      DisplayCollection.filter(x=>x.weight<= weightFilter +.25
-                                &&x.weight>= weightFilter -.25)
-      displayResults(DisplayCollection);
+      game.video = videoAddress.replace("watch?v=", "embed/");
+      //this next bit feels like redundant code
+      game.gameId = $(data).find("item").attr("id"),
+      game.name = $(data).find('name').attr("value");
+      game.thumbnail = $(data).find('thumbnail').text();
+      game.minPlayers = Number($(data).find("minplayers").attr("value"));
+      game.maxPlayers = Number($(data).find("maxplayers").attr("value"));
+      game.playTime = Number($(data).find("playingtime").attr("value"));
+      //game.rank = this.rankPrime;
+      game.rank = Number($(data).find("rank").attr('value'));
+      DisplayCollection.push(game);
+      DisplayCollection.sort((a,b)=>(a.rank - b.rank));
+      console.log('disp coll ', DisplayCollection);
+      console.log('dispcoll is type ', typeof DisplayCollection);
     });
-  });
-}
+  }).then(function(){
+    /* console.log('wf is now ', weightFilter);
+    weightMax = weightFilter + .25;
+    weightMin = weightFilter - .25;
+    DisplayCollection.filter(x=>x.weight<= weightMax
+                              &&x.weight>= weightMin)*/
+    console.log(DisplayCollection);
+
+    displayResults(DisplayCollection);
+  })
+};
 
 
 
@@ -156,7 +180,7 @@ function watchSubmit () {
     UserCollection = [];
     DisplayCollection = [];
     weightFilter = $('#diff-level').val();
-    (console.log('weight filter is ', weightFilter));
+    //(console.log('weight filter is ', weightFilter));
     $('.results-list').html("");
     $.ajax({
       url: 'https://www.boardgamegeek.com/xmlapi2/collection',
