@@ -4,6 +4,31 @@ let DisplayCollection = [];
 
 let weightFilter = 1;
 
+
+
+function gameFailureCallback(xhr, statusText, errorThrown ) {
+  console.log('reason for failure2', statusText);
+  console.log('her is xhr2', xhr);
+  console.log('here is errorThrown2', errorThrown );
+  console.log('trial #', this.tryCount);
+  if (statusText === "error") {
+    console.log('statusText is error');
+    this.tryCount++;
+    console.log('tryCount is ', this.tryCount);
+    if (this.tryCount <= this.retryLimit) {
+        //try again
+        $.ajax(this);
+        return;
+    }            
+    return;
+  }
+  if (xhr.status == 500) {
+      //handle error
+  } else {
+      //handle error
+  }
+};
+
 if(typeof $ !== 'undefined' && $.ajax) $.ajax.multiple = function(requests, responseCallback, failureCallback){
   const responseObjects = [];
   // $.when() will take any number of promises as arguments, and trigger a callback function when all the promises complete.
@@ -27,8 +52,10 @@ if(typeof $ !== 'undefined' && $.ajax) $.ajax.multiple = function(requests, resp
     responseCallback(responseObjects);
   }).fail(function(error){
     console.log("failure response:", JSON.stringify(error));
-  });
-}
+    console.log('error is ', error);
+    failureCallback(error);
+    });
+};
 
 
 
@@ -68,7 +95,7 @@ return `
 function displayResults(collection) {
   const results = collection.map(renderResult);
   $('.results-list').html("").append(results);
-  if(collection.length = 1){
+  if(collection.length === 1){
     var resultsHeading = "Result Found:"
   } else {
     var resultsHeading = "Results Found:"
@@ -110,7 +137,9 @@ function getMoreGameInfo (array) {
       minPlayersPrime: element.minPlayers,
       maxPlayersPrime: element.maxPlayers,
       playTimePrime: element.playTime,
-      rankPrime: element.rank
+      rankPrime: element.rank,
+      tryCount: 0,
+      tryLimit: 6
     }
   });
   $.ajax.multiple(settingsObjects, function(elements){
@@ -140,7 +169,7 @@ function getMoreGameInfo (array) {
     finalCollection = DisplayCollection.filter(x=>x.weight<= weightMax
                               &&x.weight>= weightMin);
     displayResults(finalCollection);
-  });
+  }, gameFailureCallback);
 };
 
 
@@ -177,6 +206,8 @@ function watchSubmit () {
         stats: 1,
         own: 1
         },
+      tryCount : 0,
+      retryLimit : 6,
       maxTimeParameter: $('#playtime').val(),
       playerNumParameter: $('#player-number').val(),
       diffLevelParameter: $('#diff-level').val(),
@@ -188,13 +219,29 @@ function watchSubmit () {
       let filteredCollection = filterByCollectionParameters(newArray,Number($('#playtime').val()),Number($('#player-number').val()));
       let sortedCollection = filteredCollection.sort((a,b)=>a.rank - b.rank);
       getMoreGameInfo(sortedCollection)
+    }).fail(function(xhr, textStatus, errorThrown ) {
+      console.log('reason for failure', textStatus);
+      if (textStatus == 'error') {
+          this.tryCount++;
+          if (this.tryCount <= this.retryLimit) {
+              //try again
+              $.ajax(this);
+              return;
+          }            
+          return;
+      }
+      if (xhr.status == 500) {
+          //handle error
+      } else {
+          //handle error
+      }
     })
   });
 }
 
 
 
-function watchMoreInfoClick () {
+function watchVideoClick () {
   $('.results-list').on('click', '.videoTab', function() {
     event.stopPropagation;
     gameName = $(this).closest('li').find('img').attr('alt');
@@ -254,5 +301,5 @@ function watchTabs() {
 $(watchTabs);
 $(watchSlider);
 $(watchSubmit);
-$(watchMoreInfoClick);
+$(watchVideoClick);
 $(displayFullDescription);
