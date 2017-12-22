@@ -34,24 +34,68 @@ if(typeof $ !== 'undefined' && $.ajax) $.ajax.multiple = function(requests, resp
 
 function renderResult (item) {
 return `
+  <li class="result-item">
+    <h3 class="game-name">${item.name}</h3>
+    <img src="${item.thumbnail}" alt="${item.name}">
+    <div class="tab">
+      <button class="tablinks defaultOpen" onclick="openInfo(event, '${item.gameId}Description')">Description</button>
+      <button class="tablinks" onclick="openInfo(event, '${item.gameId}Video')">Video</button>
+      <button class="tablinks" onclick="openInfo(event, '${item.gameId}Stats')">Stats</button>
+    </div>
+
+    <div id="${item.gameId}Description" class="tabcontent">
+      <p class="game-description short" >${item.shortDescription}</p>
+      <p class="game-description full" hidden>${item.description}</p>
+    </div>
+
+    <div id="${item.gameId}Video" class="tabcontent">
+      <p>Video</p>
+    </div>
+
+    <div id="${item.gameId}Stats" class="tabcontent">
+      <ul>
+        <li>Rank: ${item.rank}</li>
+        <li>Weight: ${item.weight}</li>
+        <li>Player Count: ${item.minPlayers} - ${item.maxPlayers}</li>
+        <li>Playing Time: ${item.playTime} minutes</li>
+      </ul>
+    </div>
+  </li>
+  `
+
+
+
+
+
+/*
       <li class="result-item">
         <h3 class="game-name">#${item.rank}: ${item.name}</h3>
         <p>Weight: ${item.weight}</p>
         <img src="${item.thumbnail}" alt="${item.name}">
         <p class="game-description short" >${item.shortDescription}</p>
         <p class="game-description full" hidden>${item.description}</p>
-        <button class="display-more-info">More Information</button>
-        <div class="extra-info" hidden>
+        <button class="display-video">Video Explanation</button>
+        <div class="video-explanation" hidden>
         </div>
-      </li>
-      `;
+      </li>*/
+      ;
 };
 
 
 
 function displayResults(collection) {
-const results = collection.map(renderResult);
-$('.results-list').html("").append(results);
+  const results = collection.map(renderResult);
+  $('.results-list').html("").append(results);
+  if(results.length = 1){
+    var resultsHeading = "Result Found:"
+  } else {
+    var resultsHeading = "Results Found:"
+  };
+  $('.results-title').text(`${results.length} ${resultsHeading}`);
+  var descriptionsToClick = document.getElementsByClassName("defaultOpen")
+  for (i = 0; i < descriptionsToClick.length; i++) {
+    descriptionsToClick[i].click();
+  }
 };
 
 
@@ -99,7 +143,7 @@ function getMoreGameInfo (array) {
     elements.forEach(function(data) {
       let game = {}
       game.description = $(data).find("description").text();
-      game.shortDescription = $(data).find("description").text().slice(0,250) + "..."
+      game.shortDescription = $(data).find("description").text().slice(0,250) + `...<br><span class="more-description">[Click for full description]</span>`
       //game.playerPollResults = $(data).find("description").text();
       game.weight = Number($(data).find("averageweight").attr("value"));
       videoAddress = $(data).find('video').attr('link');
@@ -206,12 +250,12 @@ function watchSubmit () {
 }
 
 function watchMoreInfoClick () {
-  $('.results-list').on('click', '.display-more-info', function() {
+  $('.results-list').on('click', '.display-video', function() {
     event.stopPropagation;
-    $(this).closest('li').find('.extra-info').toggle();
+    $(this).closest('li').find('.video-explanation').toggle();
     gameName = $(this).closest('li').find('img').attr('alt');
     gameVidAddress = DisplayCollection.find(x=>x.name===gameName).video;
-    $(this).closest('li').find('.extra-info').html(
+    $(this).closest('li').find('.video-explanation').html(
       `<iframe width="420" height="315" src="${gameVidAddress}"></iframe>`)
   })
 };
@@ -239,12 +283,32 @@ $("#" + labelID).text(rangeValue);
 }
 
 
+function openInfo(evt, infoType) {
+  // Declare all variables
+  var i, tabcontent, tablinks;
 
+  // Get all elements with class="tabcontent" and hide them
+  tabcontent = $(this).closest('li').getElementsByClassName("tabcontent");
+  for (i = 0; i < tabcontent.length; i++) {
+      tabcontent[i].style.display = "none";
+  }
+
+  // Get all elements with class="tablinks" and remove the class "active"
+  tablinks = $(this).closest('li').getElementsByClassName("tablinks");
+  for (i = 0; i < tablinks.length; i++) {
+      tablinks[i].className = tablinks[i].className.replace(" active", "");
+  }
+
+  // Show the current tab, and add an "active" class to the button that opened the tab
+  $(this).closest('li').getElementById(infoType).style.display = "block";
+  evt.currentTarget.className += " active";
+}
 
 
 
 
 //$(handleResults(TempData));
+//$(function(){document.getElementsByClassName("defaultOpen").click()})
 $(watchSlider);
 $(watchSubmit);
 $(watchMoreInfoClick);
