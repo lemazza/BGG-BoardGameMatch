@@ -1,3 +1,11 @@
+/*
+====================================================================
+
+tab style
+
+=================================================================
+*/
+
 .tab {
     overflow: hidden;
     border: 1px solid #ccc;
@@ -23,7 +31,6 @@
 }
 
 .tabcontent {
-    display: none;
     padding: 6px 12px;
     border: 1px solid #ccc;
     border-top: none;
@@ -37,4 +44,18 @@
 @keyframes fadeEffect {
     from {opacity: 0;}
     to {opacity: 1;}
+}
+
+/*
+===============================================================
+
+other
+
+===============================================================
+*/
+
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
 }
