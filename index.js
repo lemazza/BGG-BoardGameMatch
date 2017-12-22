@@ -50,10 +50,10 @@ if(typeof $ !== 'undefined' && $.ajax) $.ajax.multiple = function(requests, resp
     }
     // Once all arguments have been pushed onto our array, we can pass it to the provided callback function.
     responseCallback(responseObjects);
-  }).fail(function(error){
+  }).fail(function(jqxhr, textStatus, error){
     console.log("failure response:", JSON.stringify(error));
-    console.log('error is ', error);
-    failureCallback(error);
+    console.log('jqxhr is ', jqxhr);
+    failureCallback(jqxhr, textStatus, error);
     });
 };
 

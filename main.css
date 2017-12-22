@@ -59,3 +59,11 @@ ul {
     margin: 0;
     padding: 0;
 }
+
+form {
+  margin-left: 10px;
+}
+
+button:focus {
+  background-color: blue;
+}
