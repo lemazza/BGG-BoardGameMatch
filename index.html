@@ -3,30 +3,68 @@
 <head>
   <title>Boardgame Selector API</title>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.1.1/normalize.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
+  <link rel="stylesheet" href="grid.css">
   <link rel="stylesheet" href="main.css">
 </head>
 <body>
-  <form id="query-form">
-    <label for="bgg-user">Board Game Geek User Name</label>
+  <header class="row">
+    <h1>Game Selector</h1>
+    <p>search a collection to decide what game to play</p>
+  </header>
+  <main>
+    <form id="query-form" class="row">
+      <label for="bgg-user">Board Game Geek User Name</label>
       <input type="text" id="bgg-user" value="lemazza"><br>
-    <label for="player-number">Number of Players: </label><label id="num-label">2</label><br>
-      <input type="range" min="1" max="12" value="2" class="slider" id="player-number" value="6" aria-labeled-by="num-label"><br>
-    <label for="diff-level">Difficulty Level: </label><label id="diff-label">1.25</label><br>
-      <input type="range" min="1" max="5" value="1.25" step=".25" class="slider" id="diff-level" aria-labeled-by="diff-label"><br>
 
-    <label for="playtime" >Max Gamelength in Minutes</label>
-      <input type="number" id="playtime" value="30"><br>
-    <button type="submit">Submit</button>
-  </form>
+      <label for="player-number">Number of Players: </label><label id="num-label">2</label><br>
+      <input type="range" min="1" max="12" value="2" class="slider" id="player-number" value="6" list="player-ticks" aria-labeled-by="num-label">
+        <datalist id="player-ticks">
+          <option>1</option>
+          <option>2</option>
+          <option>3</option>
+          <option>4</option>
+          <option>5</option>
+          <option>6</option>
+          <option>7</option>
+          <option>8</option>
+          <option>9</option>
+          <option>10</option>
+          <option>11</option>
+          <option>12</option>
+        </datalist><br>
 
-  <section class="results-container">
-    <h2 class="results-title">Results:</h2>
-    <ol class="results-list">
-    </ol>
-  </section>
+      <label for="diff-level">Difficulty Level: </label><label id="diff-label">1.25</label><br>
+      <input type="range" min="1" max="4" value="1.2" step=".1" class="slider" id="diff-level" list="diff-ticks" aria-labeled-by="diff-label">
+        <datalist id="diff-ticks">
+          <option>1</option>
+          <option>2</option>
+          <option>3</option>
+          <option>4</option>
+        </datalist><br>
+
+      <label for="playtime" >Max Game Length in Minutes: </label><label id="time-label">30</label><br>
+      <input type="range" min="15" max="240" step="15" class="slider" list="time-ticks" id="playtime" value="30" aria-labeled-by="time-label"><br>
+        <datalist id="time-ticks">
+          <option>15</option>
+          <option>60</option>
+          <option>120</option>
+          <option>180</option>
+          <option>240</option>
+        </datalist><br>
+
+      <button type="submit">Submit</button>
+    </form>
+
+    <section class="results-container row">
+      <h2 class="results-title" aria-live="assertive">Results:</h2>
+      <ol class="results-list">
+      </ol>
+    </section>
+  </main>
   <script type="text/javascript" src="index.js"></script>
 </body>
 </html>

@@ -1,3 +1,84 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #c02315;
+}
+
+.results-container{
+  background-color: white;
+}
+
+.results-container {
+  border: 10px solid grey;
+  border-top: none;
+}
+
+
+/*
+=====================================================================
+
+Header Style
+
+==================================================================
+*/
+
+header {
+  font-family: 'Lato', sans-serif;
+  color: white;
+  font-size: 30px;
+  border: 10px solid grey;
+}
+header p {
+  font-size: 20px;
+  margin-top: 5px;
+}
+
+h1 {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+
+
+
+
+/*
+=====================================================================
+
+Form Style
+
+==================================================================
+*/
+form {
+  background-color: #732919;
+  border: 10px solid grey;
+  border-top: none;
+  font-family: 'Lato', sans-serif;
+  color: white;
+  font-size: 20px;
+  font-weight: 400;
+
+  padding: 10px;
+}
+
+label, button[type="submit"] {
+  display: inline-block;
+  margin-top: 25px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
 /*
 ====================================================================
 
@@ -40,10 +121,101 @@ tab style
     animation: fadeEffect 1s; /* Fading effect takes 1 second */
 }
 
+
 /* Go from zero to full opacity */
 @keyframes fadeEffect {
     from {opacity: 0;}
     to {opacity: 1;}
+}
+
+
+/*
+===========================================================
+
+Game Display
+
+=============================================================
+*/
+h3.game-name {
+  font-size: 25px;
+  margin-bottom: 0;
+  border-bottom: 1px solid #ccc;
+}
+
+.year-designer {
+  font-size: 18px;
+  font-style: italic;
+  background-color: #ccc;
+  margin-top: 0;
+  padding-left: 2em;
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+
+.thumb-box {
+  float: left;
+  width: 150px;
+  height: 150px;
+}
+
+.game-thumb {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  margin: 0 auto;
+}
+
+.game-info-box {
+  margin-left: 160px;
+}
+
+
+
+
+/*
+===========================================
+
+list styles
+
+============================================
+*/
+
+
+body {
+   counter-reset: item;
+ }
+ ol {
+   list-style: none;
+   padding-left: 5px;
+ }
+ ol>li {
+   counter-increment: item;
+   margin-bottom: 5px;
+   margin-top: 30px;
+ }
+ ol>li:before {
+    margin-right: 10px;
+    content: counter(item);
+    background: #c02315;
+    border-radius: 50%;
+    color: white;
+    float: left;
+    min-width: 1.2em;
+    padding: .2em;
+    text-align: center;
+    position: relative;
+    display: inline-block;
+ }
+
+
+
+
+
+
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
 }
 
 /*
@@ -53,16 +225,6 @@ other
 
 ===============================================================
 */
-
-ul {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-}
-
-form {
-  margin-left: 10px;
-}
 
 button:focus {
   background-color: blue;
