@@ -4,25 +4,7 @@ let DisplayCollection = [];
 
 let weightFilter = 1;
 
-(function(old) {
-  $.fn.attr = function() {
-    if(arguments.length === 0) {
-      if(this.length === 0) {
-        return null;
-      }
 
-      var obj = {};
-      $.each(this[0].attributes, function() {
-        if(this.specified) {
-          obj[this.name] = this.value;
-        }
-      });
-      return obj;
-    }
-
-    return old.apply(this, arguments);
-  };
-})($.fn.attr);
 
 function gameFailureCallback(xhr, statusText, errorThrown ) {
   console.log('reason for failure2', statusText);
@@ -43,35 +25,7 @@ function gameFailureCallback(xhr, statusText, errorThrown ) {
       //handle error
   }
 };
-/*
-if(typeof $ !== 'undefined' && $.ajax) $.ajax.multiple = function(requests, responseCallback, failureCallback){
-  const responseObjects = [];
-  // $.when() will take any number of promises as arguments, and trigger a callback function when all the promises complete.
-  // But first we must translate our URLs or settings objects into actual $.ajax request promises (deferreds).
-  // And before we call ajax, we need to add a failure function to catch 404 not found errors which would otherwise stop the whole batch.
-  const handle404 = function(error, ){
-    
-  }
-  const promises = requests.map(x=>$.ajax(x));
-  
-  // Since we want to accept an array of an arbitrary number of promises, we use Function.prototype.apply() to call the function using an array to populate the arguments list rather than having to name the arguments one at a time.
-  return $.when.apply(this, promises).then(function(){
-    
-    // translate "array-like" `arguments` object into an actual array so our clients can use array methods on the response
-    for( let i=0; i < arguments.length; i++ ){
-      let response = arguments[i];
-      if( Array.isArray(response) ){ response = response[0]; }
-      responseObjects.push(response);
-    }
-    // Once all arguments have been pushed onto our array, we can pass it to the provided callback function.
-    responseCallback(responseObjects);
-  }).fail(function(jqxhr, textStatus, error){
-    console.log("failure response:", JSON.stringify(error));
-    console.log('jqxhr is ', jqxhr);
-    failureCallback(jqxhr, textStatus, error);
-    });
-};
-*/
+
 
 
 function renderResult (item) {
@@ -180,7 +134,6 @@ function getMoreGameInfo (array) {
 
 function findPollScore (pollXml, playerNum) {
   // return % of positive results for playerNum
-  console.log('lets see one', $(pollXml[playerNum-1]));
   let voteNode = $(pollXml[playerNum-1]).children();
   let bestVotes = Number($(voteNode[0]).attr("numvotes"));
   let recVotes = Number($(voteNode[1]).attr("numvotes"));
@@ -188,6 +141,7 @@ function findPollScore (pollXml, playerNum) {
 
   return (bestVotes+recVotes)/(bestVotes+recVotes+nrVotes);
 }
+
 
 
 function newGameObjectCreator (index, xmlItem) {
@@ -204,7 +158,7 @@ function newGameObjectCreator (index, xmlItem) {
     bayesAve: $(xmlItem).find("bayesaverage").attr("value"),
     weight: Number($(xmlItem).find("averageweight").attr("value")),
     //this next bit feels like redundant code
-    gameId: $(xmlItem).find("item").attr("id"),
+    gameId: $(xmlItem).attr("id"),
     name: $(xmlItem).find('name').attr("value"),
     thumbnail : $(xmlItem).find('thumbnail').text(),
     minPlayers : Number($(xmlItem).find("minplayers").attr("value")),
@@ -220,6 +174,8 @@ function newGameObjectCreator (index, xmlItem) {
   }
   return game
 }
+
+
 
 function gameObjectCreator (index, xmlItem) {
   //get individual xml item and create object
@@ -308,10 +264,13 @@ function watchVideoClick () {
 }
 
 
+
 function watchRuleClick () {
   $('.results-list').on('click', '.rulesTab', function() {
     event.stopPropagation;
-    let id = $(this).closest('li').find('h3').attr('data-game-id');
+    let id = $(this).closest('li').find('.game-name').attr('data-game-id');
+    console.log('id is ', id);
+
     let rulesLocation = $(this).closest('li').find('.Rules');
     if(rulesLocation.children().length == 0) {
       $.ajax({
@@ -379,6 +338,7 @@ function watchTabs() {
     $(this).addClass("active");
   });
 }
+
 
 
 $(watchRuleClick);
