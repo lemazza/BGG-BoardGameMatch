@@ -269,12 +269,13 @@ function watchRuleClick () {
   $('.results-list').on('click', '.rulesTab', function() {
     event.stopPropagation;
     let id = $(this).closest('li').find('.game-name').attr('data-game-id');
+    let gameName = $(this).closest('li').find('img').attr('alt');
     console.log('id is ', id);
 
     let rulesLocation = $(this).closest('li').find('.Rules');
     if(rulesLocation.children().length == 0) {
       $.ajax({
-        url: `https://boardgamegeek.com/boardgame/${id}`,
+        url: `https://boardgamegeek.com/boardgame/${id}/${gameName}`,
         type: "GET",
         dataType: "html",
         
