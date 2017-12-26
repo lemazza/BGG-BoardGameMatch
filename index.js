@@ -77,8 +77,8 @@ if(typeof $ !== 'undefined' && $.ajax) $.ajax.multiple = function(requests, resp
 function renderResult (item) {
 return `
   <li class="game-item">
-    <h3 class="game-name">${item.name}</h3>
-    <p class="year-designer">(2002) Trevor Noah</p>
+    <h3 class="game-name" data-game-id="${item.gameId}">${item.name}</h3>
+    <p class="year-designer"><span class="game-year">(${item.year})</span> ${item.designer}</p>
     <div class="thumb-box">
       <img class="game-thumb" src="${item.thumbnail}" alt="${item.name}">
     </div>
@@ -87,6 +87,7 @@ return `
         <button class="tablinks active")">Description</button>
         <button class="tablinks videoTab" )">Video</button>
         <button class="tablinks")">Stats</button>
+        <button class="tablinks rulesTab")">Rules</button>
       </div>
     
       <div class="Description tabcontent">
@@ -100,11 +101,17 @@ return `
 
       <div class="Stats tabcontent">
         <ul>
-          <li>Rank: ${item.rank}</li>
+          <li>sort score: ${item.bayesAve*item.pollValue}</li>
+          <li>Bayesian: ${item.bayesAve}<li>
+          <li>Reccomendation %: ${item.pollValue}</li>
+          <li>BGG Rank: ${item.rank}</li>
           <li>Weight: ${item.weight}</li>
           <li>Player Count: ${item.minPlayers} - ${item.maxPlayers}</li>
           <li>Playing Time: ${item.playTime} minutes</li>
         </ul>
+      </div>
+
+      <div class="Rules tabcontent">
       </div>
     </div>
   </li>
@@ -171,14 +178,31 @@ function getMoreGameInfo (array) {
 
 
 
-function newGameObjectCreator (index, xmlItem) {
-  let game = {
+function findPollScore (pollXml, playerNum) {
+  // return % of positive results for playerNum
+  console.log('lets see one', $(pollXml[playerNum-1]));
+  let voteNode = $(pollXml[playerNum-1]).children();
+  let bestVotes = Number($(voteNode[0]).attr("numvotes"));
+  let recVotes = Number($(voteNode[1]).attr("numvotes"));
+  let nrVotes = Number($(voteNode[2]).attr("numvotes"));
 
+  return (bestVotes+recVotes)/(bestVotes+recVotes+nrVotes);
+}
+
+
+function newGameObjectCreator (index, xmlItem) {
+  let designers=$(xmlItem).find('link[type="boardgamedesigner"]');
+  let designerArray = $.map(designers, function(value, index) {return [$(value).attr("value")]});
+  let designerText = "Designer: ";
+  if(designerArray.length > 1) designerText = "Designers: ";
+  let game = {
+    designer: designerText + designerArray.join(', '),
+    year: $(xmlItem).find("yearpublished").attr("value"),
     description: $(xmlItem).find("description").text(),
     shortDescription: $(xmlItem).find("description").text().slice(0,250) + "..." ,
-    //game.playerPollResults = $(data).find("description").text();
+    playerPollResults: $(xmlItem).find('poll[name="suggested_numplayers"]').children(),
+    bayesAve: $(xmlItem).find("bayesaverage").attr("value"),
     weight: Number($(xmlItem).find("averageweight").attr("value")),
-    videoAddress: $(xmlItem).find('video').attr('link'),
     //this next bit feels like redundant code
     gameId: $(xmlItem).find("item").attr("id"),
     name: $(xmlItem).find('name').attr("value"),
@@ -186,12 +210,14 @@ function newGameObjectCreator (index, xmlItem) {
     minPlayers : Number($(xmlItem).find("minplayers").attr("value")),
     maxPlayers : Number($(xmlItem).find("maxplayers").attr("value")),
     playTime : Number($(xmlItem).find("playingtime").attr("value")),
-    //game.rank = this.rankPrime;
     rank : Number($(xmlItem).find("rank").attr('value')),
+  };
+  pollResult = findPollScore(game.playerPollResults, Number($('#player-number').val()));
+  if (isNaN(pollResult)) {
+    game.pollValue = .4;
+  } else {
+    game.pollValue = pollResult;
   }
-  if(game.videoAddress) {
-    game.video = game.videoAddress.replace("watch?v=", "embed/");}
-  ;
   return game
 }
 
@@ -217,8 +243,13 @@ function getSortedObjects (xmlData, mapFunction, filter) {
   //gameObjectList is an object and needs to be an array to filter
   var newArray = $.map(gameObjectList, function(value, index) {return [value]});
   let filteredCollection = filter? filterByCollectionParameters(newArray,Number($('#playtime').val()),Number($('#player-number').val())) : filterWithNewInfo(newArray);
-  let sortedCollection = filteredCollection.sort((a,b)=>a.rank - b.rank);
-  return sortedCollection;
+ 
+  if(filter) {
+    filteredCollection.sort((a,b)=>a.rank - b.rank);
+  } else {
+    filteredCollection.sort((a,b)=>(b.bayesAve*(2+b.pollValue))-(a.bayesAve*(2+a.pollValue)));
+  }
+  return filteredCollection;
 }
 
 
@@ -256,9 +287,7 @@ function watchVideoClick () {
     event.stopPropagation;
     let gameName = $(this).closest('li').find('img').attr('alt');
     let gameSearch = gameName + " Boardgame" + " rules";
-    console.log(gameSearch);
     let vidLocation = $(this).closest('li').find('.Video');
-    console.log(Boolean(vidLocation.children().length == 0));
     if(vidLocation.children().length == 0) {
       $.ajax({
         url: "https://www.googleapis.com/youtube/v3/search",
@@ -272,8 +301,28 @@ function watchVideoClick () {
         vidLocation: $(this).closest('li').find('.Video')
       }).done(function(data){
         let vidAddress = data.items[0].id.videoId;
-        console.log(this.vidLocation);
         this.vidLocation.html(`<iframe width="420" height="315" src="https://www.youtube.com/embed/${vidAddress}"></iframe>`)
+      })
+    }
+  });
+}
+
+
+function watchRuleClick () {
+  $('.results-list').on('click', '.rulesTab', function() {
+    event.stopPropagation;
+    let id = $(this).closest('li').find('h3').attr('data-game-id');
+    let rulesLocation = $(this).closest('li').find('.Rules');
+    if(rulesLocation.children().length == 0) {
+      $.ajax({
+        url: `https://boardgamegeek.com/boardgame/${id}`,
+        type: "GET",
+        dataType: "html",
+        
+        rulesLocation: $(this).closest('li').find('.Rules')
+      }).done(function(data){
+        console.log(data);
+        this.rulesLocation.html()
       })
     }
   });
@@ -332,7 +381,7 @@ function watchTabs() {
 }
 
 
-
+$(watchRuleClick);
 $(watchTabs);
 $(watchSlider);
 $(watchSubmit);

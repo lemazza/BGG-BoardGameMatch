@@ -143,13 +143,17 @@ h3.game-name {
 }
 
 .year-designer {
-  font-size: 18px;
+  font-size: 15px;
   font-style: italic;
   background-color: #ccc;
   margin-top: 0;
   padding-left: 2em;
   padding-top: 3px;
   padding-bottom: 3px;
+}
+
+.game-year {
+  font-size: 18px;
 }
 
 .thumb-box {
