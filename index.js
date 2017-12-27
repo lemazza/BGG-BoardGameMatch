@@ -23,8 +23,7 @@ function gameFailureCallback(xhr, statusText, errorThrown ) {
 
 
 
-function renderResult (item) {
-  
+function renderResult (item) { 
 return `
   <li class="game-item" aria-labelledby="game-${item.gameId}" aria-describedby="desc-${item.gameId}">
     <h3 id="game-${item.gameId}" class="game-name" data-game-id="${item.gameId}">${item.name}</h3>
@@ -68,6 +67,7 @@ return `
 function displayResults(collection) {
   const results = collection.map(renderResult);
   $('.results-list').html("").append(results);
+
   if(collection.length === 1){
     var resultsHeading = "Result Found:"
   } else {
@@ -175,7 +175,6 @@ function gameObjectCreator (index, xmlItem) {
   let game= {
     gameId: $(xmlItem).attr("objectid"),
     name: $(xmlItem).find('name').text(),
-    thumbnail: $(xmlItem).find('thumbnail').text(),
     minPlayers: Number($(xmlItem).find("stats").attr("minplayers")),
     maxPlayers: Number($(xmlItem).find("stats").attr("maxplayers")),
     playTime: Number($(xmlItem).find("stats").attr("playingtime")),
@@ -206,7 +205,6 @@ function getSortedObjects (xmlData, mapFunction, filter) {
 function watchSubmit () {
   $('#query-form').submit(event => {
     event.preventDefault();
-    console.log('submit pressed')
     weightFilter = Number($('#diff-level').val());
     $('.results-title').text("Finding Games");
     $('.results-list').html("");
@@ -235,7 +233,7 @@ function watchVideoClick () {
   $('.results-list').on('click', '.videoTab', function() {
     event.stopPropagation;
     let gameName = $(this).closest('li').find('img').attr('alt');
-    let gameSearch = gameName + " Boardgame" + " rules";
+    let gameSearch = gameName + " board game" + " rules";
     let vidLocation = $(this).closest('li').find('.Video');
     if(vidLocation.children().length == 0) {
       $.ajax({
@@ -306,6 +304,8 @@ function watchTabs() {
     $(this).addClass("active");
   });
 }
+
+
 
 $(document).on({
     ajaxStart: function() { 
