@@ -47,12 +47,12 @@ h1 {
 /*
 =====================================================================
 
-Form Style
+Form Style #732919
 
 ==================================================================
 */
 form {
-  background-color: #732919;
+  background-color: #2b1001;
   border: 10px solid grey;
   border-top: none;
   font-family: 'Lato', sans-serif;
@@ -68,7 +68,9 @@ label, button[type="submit"] {
   margin-top: 25px;
 }
 
-
+.slider-output {
+  font-weight: bold;
+}
 
 
 
@@ -156,6 +158,10 @@ h3.game-name {
   font-size: 18px;
 }
 
+.game-designer {
+  margin-left: 1em;
+}
+
 .thumb-box {
   float: left;
   width: 150px;
@@ -170,10 +176,30 @@ h3.game-name {
 }
 
 .game-info-box {
-  margin-left: 160px;
+  min-width: 300px;
+  clear: both;
 }
 
+.Stats li {
+  margin-top: 10px;
+  margin-bottom: 12px;
+}
 
+.stat-type {
+  font-weight: bold;
+}
+
+@media only screen and (min-width: 460px) {
+
+  .game-info-box, .tab{
+    margin-left: 160px;
+  }
+
+  .game-info-box {
+    clear: none;
+  }
+
+}
 
 
 /*
@@ -231,5 +257,10 @@ other
 */
 
 button:focus {
-  background-color: blue;
+  border: 1px solid black;
+}
+
+.loading-img {
+  display: block;
+  margin: 0 auto;
 }

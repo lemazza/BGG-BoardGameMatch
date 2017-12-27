@@ -1,9 +1,4 @@
-let UserCollection = [];
-
-let DisplayCollection = [];
-
 let weightFilter = 1;
-
 
 
 function gameFailureCallback(xhr, statusText, errorThrown ) {
@@ -32,18 +27,17 @@ function renderResult (item) {
 return `
   <li class="game-item">
     <h3 class="game-name" data-game-id="${item.gameId}">${item.name}</h3>
-    <p class="year-designer"><span class="game-year">(${item.year})</span> ${item.designer}</p>
+    <p class="year-designer"><span class="game-year">(${item.year})</span> <span class="game-designer">${item.designer}<span></p>
     <div class="thumb-box">
       <img class="game-thumb" src="${item.thumbnail}" alt="${item.name}">
     </div>
-    <div class="game-info-box">
+    
       <div class="tab">
         <button class="tablinks active")">Description</button>
         <button class="tablinks videoTab" )">Video</button>
         <button class="tablinks")">Stats</button>
-        <button class="tablinks rulesTab")">Rules</button>
       </div>
-    
+    <div class="game-info-box">
       <div class="Description tabcontent">
         <p class="game-description short" >${item.shortDescription}</p>
         <p class="game-description full" hidden>${item.description}</p>
@@ -55,17 +49,13 @@ return `
 
       <div class="Stats tabcontent">
         <ul>
-          <li>sort score: ${item.bayesAve*item.pollValue}</li>
-          <li>Bayesian: ${item.bayesAve}<li>
-          <li>Reccomendation %: ${item.pollValue}</li>
-          <li>BGG Rank: ${item.rank}</li>
-          <li>Weight: ${item.weight}</li>
-          <li>Player Count: ${item.minPlayers} - ${item.maxPlayers}</li>
-          <li>Playing Time: ${item.playTime} minutes</li>
+          <li><span class="stat-type">BGG Rank:</span> ${item.rank}</li>
+          <li><span class="stat-type">Recommendation score:</span> ${(item.bayesAve*(2+item.pollValue)).toFixed(2)}</li>
+          <li><span class="stat-type">Recommendation %:</span> ${(item.pollValue*100).toFixed(1)}</li>
+          <li><span class="stat-type">Difficulty Level:</span> ${(item.weight).toFixed(2)}</li>
+          <li><span class="stat-type">Player Count:</span> ${item.minPlayers} - ${item.maxPlayers}</li>
+          <li><span class="stat-type">Playing Time:</span> ${item.playTime} minutes</li>
         </ul>
-      </div>
-
-      <div class="Rules tabcontent">
       </div>
     </div>
   </li>
@@ -101,8 +91,8 @@ function filterByCollectionParameters (collectionArray, timeFilter, playerFilter
 
 
 function filterWithNewInfo (collectionArray) {
-  weightMax = weightFilter + .25;
-  weightMin = weightFilter - .25;
+  weightMax = weightFilter + .3;
+  weightMin = weightFilter - .3;
   return collectionArray.filter(x=>x.weight<= weightMax && x.weight>= weightMin);
 }
 
@@ -127,7 +117,7 @@ function getMoreGameInfo (array) {
       },
       error: gameFailureCallback
   };
-  $.ajax(settingsObject);
+  $.ajax(settingsObject)
 }
 
 
@@ -149,13 +139,14 @@ function newGameObjectCreator (index, xmlItem) {
   let designerArray = $.map(designers, function(value, index) {return [$(value).attr("value")]});
   let designerText = "Designer: ";
   if(designerArray.length > 1) designerText = "Designers: ";
+
   let game = {
     designer: designerText + designerArray.join(', '),
     year: $(xmlItem).find("yearpublished").attr("value"),
     description: $(xmlItem).find("description").text(),
     shortDescription: $(xmlItem).find("description").text().slice(0,250) + "..." ,
     playerPollResults: $(xmlItem).find('poll[name="suggested_numplayers"]').children(),
-    bayesAve: $(xmlItem).find("bayesaverage").attr("value"),
+    bayesAve: Number($(xmlItem).find("bayesaverage").attr("value")),
     weight: Number($(xmlItem).find("averageweight").attr("value")),
     //this next bit feels like redundant code
     gameId: $(xmlItem).attr("id"),
@@ -166,6 +157,7 @@ function newGameObjectCreator (index, xmlItem) {
     playTime : Number($(xmlItem).find("playingtime").attr("value")),
     rank : Number($(xmlItem).find("rank").attr('value')),
   };
+
   pollResult = findPollScore(game.playerPollResults, Number($('#player-number').val()));
   if (isNaN(pollResult)) {
     game.pollValue = .4;
@@ -213,9 +205,9 @@ function getSortedObjects (xmlData, mapFunction, filter) {
 function watchSubmit () {
   $('#query-form').submit(event => {
     event.preventDefault();
-    UserCollection = [];
-    DisplayCollection = [];
+    console.log('submit pressed')
     weightFilter = Number($('#diff-level').val());
+    $('.results-title').text("Finding Games");
     $('.results-list').html("");
     $.ajax({
       url: 'https://www.boardgamegeek.com/xmlapi2/collection',
@@ -265,31 +257,6 @@ function watchVideoClick () {
 
 
 
-function watchRuleClick () {
-  $('.results-list').on('click', '.rulesTab', function() {
-    event.stopPropagation;
-    let id = $(this).closest('li').find('.game-name').attr('data-game-id');
-    let gameName = $(this).closest('li').find('img').attr('alt');
-    console.log('id is ', id);
-
-    let rulesLocation = $(this).closest('li').find('.Rules');
-    if(rulesLocation.children().length == 0) {
-      $.ajax({
-        url: `https://boardgamegeek.com/boardgame/${id}/${gameName}`,
-        type: "GET",
-        dataType: "html",
-        
-        rulesLocation: $(this).closest('li').find('.Rules')
-      }).done(function(data){
-        console.log(data);
-        this.rulesLocation.html()
-      })
-    }
-  });
-}
-
-
-
 function displayFullDescription () {
   $('.results-list').on('click','.desc-button', function() {
     if($(this).text()==="Full Description") {
@@ -314,7 +281,6 @@ function watchSlider () {
       const labelID = $(this).attr('aria-labeled-by');
       // get value of range
       const rangeValue = $(this).val();
-      //document.getElementById("#" + labelID).innerHTML = rangeValue
       // set label value to range value
       $("#" + labelID).text(rangeValue);
     })
@@ -340,9 +306,17 @@ function watchTabs() {
   });
 }
 
+$(document).on({
+    ajaxStart: function() { 
+      $(".loading").prop("hidden", false);
+      $('button[type="submit"]').prop("disabled", true);
+    },
+     ajaxStop: function() { 
+      $(".loading").prop("hidden", true);
+      $('button[type="submit"]').prop("disabled", false);
+    }    
+});
 
-
-$(watchRuleClick);
 $(watchTabs);
 $(watchSlider);
 $(watchSubmit);
