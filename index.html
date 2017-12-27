@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Boardgame Selector API</title>
+  <title>Board Game Selector</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="choose the right game from a collection">
+  <meta name="keywords" content="board game, game, boardgamegeek, bgg, eurogame, collection, library">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.1.1/normalize.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
@@ -18,10 +20,10 @@
   <main>
     <form id="query-form" class="row">
       <label for="bgg-user">Board Game Geek User Name</label>
-      <input type="text" id="bgg-user" value="lemazza"><br>
+      <input type="text" id="bgg-user" value="lemazza" required><br>
 
       <label for="player-number">Number of Players: <span id="num-label" class="slider-output">2</span></label><br>
-      <input type="range" min="1" max="12" value="2" class="slider" id="player-number" value="6" list="player-ticks" aria-labeled-by="num-label">
+      <input type="range" min="1" max="12" value="2" class="slider" id="player-number" value="6" list="player-ticks" aria-labelledby="num-label">
         <datalist id="player-ticks">
           <option>1</option>
           <option>2</option>
@@ -38,7 +40,7 @@
         </datalist><br>
 
       <label for="diff-level">Difficulty Level: <span id="diff-label" class="slider-output">1.3</span></label><br>
-      <input type="range" min="1" max="4" value="1.3" step=".1" class="slider" id="diff-level" list="diff-ticks" aria-labeled-by="diff-label">
+      <input type="range" min="1" max="4" value="1.3" step=".1" class="slider" id="diff-level" list="diff-ticks" aria-labelledby="diff-label">
         <datalist id="diff-ticks">
           <option>1</option>
           <option>2</option>
@@ -47,7 +49,7 @@
         </datalist><br>
 
       <label for="playtime" >Max Game Length in Minutes: <span id="time-label" class="slider-output">30</span></label><br>
-      <input type="range" min="15" max="240" step="15" class="slider" list="time-ticks" id="playtime" value="30" aria-labeled-by="time-label"><br>
+      <input type="range" min="15" max="240" step="15" class="slider" list="time-ticks" id="playtime" value="30" aria-labelledby="time-label"><br>
         <datalist id="time-ticks">
           <option>15</option>
           <option>60</option>

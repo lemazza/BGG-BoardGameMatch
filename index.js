@@ -24,9 +24,10 @@ function gameFailureCallback(xhr, statusText, errorThrown ) {
 
 
 function renderResult (item) {
+  
 return `
-  <li class="game-item">
-    <h3 class="game-name" data-game-id="${item.gameId}">${item.name}</h3>
+  <li class="game-item" aria-labelledby="game-${item.gameId}" aria-describedby="desc-${item.gameId}">
+    <h3 id="game-${item.gameId}" class="game-name" data-game-id="${item.gameId}">${item.name}</h3>
     <p class="year-designer"><span class="game-year">(${item.year})</span> <span class="game-designer">${item.designer}<span></p>
     <div class="thumb-box">
       <img class="game-thumb" src="${item.thumbnail}" alt="${item.name}">
@@ -38,7 +39,7 @@ return `
         <button class="tablinks")">Stats</button>
       </div>
     <div class="game-info-box">
-      <div class="Description tabcontent">
+      <div id="desc-${item.gameId}" class="Description tabcontent">
         <p class="game-description short" >${item.shortDescription}</p>
         <p class="game-description full" hidden>${item.description}</p>
         <button class="desc-button">Full Description</button>
@@ -278,7 +279,7 @@ function watchSlider () {
   for (i=0; i< sliders.length; i++) {
     sliders[i].addEventListener("input", function(event) {
       // get id of label
-      const labelID = $(this).attr('aria-labeled-by');
+      const labelID = $(this).attr('aria-labelledby');
       // get value of range
       const rangeValue = $(this).val();
       // set label value to range value

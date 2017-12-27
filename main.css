@@ -117,6 +117,7 @@ tab style
     padding: 6px 12px;
     border: 1px solid #ccc;
     border-top: none;
+    overflow: hidden;
 }
 
 .tabcontent {
@@ -189,7 +190,7 @@ h3.game-name {
   font-weight: bold;
 }
 
-@media only screen and (min-width: 460px) {
+@media only screen and (min-width: 680px) {
 
   .game-info-box, .tab{
     margin-left: 160px;
