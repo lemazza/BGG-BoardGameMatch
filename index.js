@@ -205,6 +205,8 @@ function getSortedObjects (xmlData, mapFunction, filter) {
   if(filter) {
     filteredCollection.sort((a,b)=>a.rank - b.rank);
   } else {
+    //incorporates info from the player poll to sort and rank the games.  So, for instance..
+    // a highly rated game that happens to not be as fun for 2 players (Codenames for example) won't be highly recommended for 2 players.
     filteredCollection.sort((a,b)=>(b.bayesAve*(2+b.pollValue))-(a.bayesAve*(2+a.pollValue)));
   }
   return filteredCollection;
