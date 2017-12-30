@@ -21,8 +21,11 @@ they own.
 In practice, at the cafe this app would only be needed to search our collection and could be displayed like a library kiosk, but the added functionality of searching for a specific user makes the app
 more useful for other folks with large collections.
 
-After submitting the form a list of games will be returned.  Each game has a description, a video rules explanation, 
-and some other descriptive information.
+After submitting the form a list of games will be returned.  Each game has a description, some other descriptive information, and a video rules explanation, because its much easier to learn a game when it's taught by someone who's played it before.
 
 #Tech used
 HTML, CSS, Javascript, jQuery.  With a special extra attention the use of ajax.
+
+#How it works
+
+After form submission, There's and ajax call to the Boardgamegeek User Collection API using the bgg username suplied.  It filters out games that don't meet the specified number of players, then it makes an ajax call to the BGG "Thing" API (which has broader information about each game than the Collection API does) with every game in the user collection that passes the first filter.  Then game objects are created with information from the Thing API.  It filters out games that aren't of the appropriate weight (or difficulty level), and sorts and displays them by their reccomendation score (wich is a weighted average of their BGG user score and the bgg polling have how many people like a game with a certain number of players).
