@@ -1,10 +1,10 @@
 let weightFilter = 1;
 
 
-function gameFailureCallback(xhr, statusText, errorThrown ) {
-  console.log('reason for failure2', statusText);
-  console.log('her is xhr2', xhr);
-  console.log('here is errorThrown2', errorThrown );
+function failureCallback(xhr, statusText, errorThrown ) {
+  console.log('failur status:', statusText);
+  console.log('here is xhr:', xhr);
+  console.log('here is errorThrown:', errorThrown );
   if (statusText === "error") {
     $('.results-title').text("Error retrieving data from Boardgamegeek.com.  Try again in a moment.")
     if (this.tryCount <= this.retryLimit) {
@@ -50,7 +50,7 @@ return `
       <div class="Stats tabcontent">
         <ul>
           <li><span class="stat-type">BGG Rank:</span> ${item.rank}</li>
-          <li><span class="stat-type">Recommendation score:</span> ${(item.bayesAve*(2+item.pollValue)).toFixed(2)}</li>
+          <li><span class="stat-type">Recommendation score:</span> ${(item.bayesAve*(2+item.pollValue)*100/24).toFixed(1)}</li>
           <li><span class="stat-type">Recommendation %:</span> ${(item.pollValue*100).toFixed(1)}</li>
           <li><span class="stat-type">Difficulty Level:</span> ${(item.weight).toFixed(2)}</li>
           <li><span class="stat-type">Player Count:</span> ${item.minPlayers} - ${item.maxPlayers}</li>
@@ -65,6 +65,7 @@ return `
 
 
 function displayResults(collection) {
+  // takes a collection array, renders each item into html ready for display and appends them to the result list
   const results = collection.map(renderResult);
   $('.results-list').html("").append(results);
 
@@ -74,6 +75,7 @@ function displayResults(collection) {
     var resultsHeading = "Results Found:"
   };
   $('.results-title').text(`${collection.length} ${resultsHeading}`);
+  //clicks each description tab to make those the first to display
   var descriptionsToClick = document.getElementsByClassName("active")
   for (i = 0; i < descriptionsToClick.length; i++) {
   descriptionsToClick[i].click();
@@ -83,6 +85,7 @@ function displayResults(collection) {
 
 
 function filterByCollectionParameters (collectionArray, timeFilter, playerFilter) {
+  //filters the collection by number of players
   return collectionArray.filter(x=>x.playTime <= timeFilter 
                       && x.minPlayers <= playerFilter 
                       && x.maxPlayers >= playerFilter 
@@ -92,6 +95,7 @@ function filterByCollectionParameters (collectionArray, timeFilter, playerFilter
 
 
 function filterWithNewInfo (collectionArray) {
+  //filters the collection array by game weight
   weightMax = weightFilter + .3;
   weightMin = weightFilter - .3;
   return collectionArray.filter(x=>x.weight<= weightMax && x.weight>= weightMin);
@@ -101,7 +105,7 @@ function filterWithNewInfo (collectionArray) {
 
 function getMoreGameInfo (array) {
   //given a gameId, this function searches for that "thing" and returns its 
-  //description, weight, and player poll results and appends it to object
+  //description, weight, player poll results, and other descriptive information not found in the collectoin api
   let idArray = array.map(x=>x.gameId);
   DisplayCollection = [];
   let settingsObject = {
@@ -116,7 +120,7 @@ function getMoreGameInfo (array) {
       success: function(data){
         displayResults( getSortedObjects(data, newGameObjectCreator, false) );
       },
-      error: gameFailureCallback
+      error: failureCallback
   };
   $.ajax(settingsObject)
 }
@@ -124,7 +128,7 @@ function getMoreGameInfo (array) {
 
 
 function findPollScore (pollXml, playerNum) {
-  // return % of positive results for playerNum
+  // return % of positive results for how BGG users liked a game with (playerNum) many players
   let voteNode = $(pollXml[playerNum-1]).children();
   let bestVotes = Number($(voteNode[0]).attr("numvotes"));
   let recVotes = Number($(voteNode[1]).attr("numvotes"));
@@ -136,6 +140,9 @@ function findPollScore (pollXml, playerNum) {
 
 
 function newGameObjectCreator (index, xmlItem) {
+  //takes and xmlItem in and produces a game object.  This one is intended for the second pass with more info
+  
+  //the designer of a game could be one or multiple people, this goes through to make either ready to display
   let designers=$(xmlItem).find('link[type="boardgamedesigner"]');
   let designerArray = $.map(designers, function(value, index) {return [$(value).attr("value")]});
   let designerText = "Designer: ";
@@ -159,6 +166,7 @@ function newGameObjectCreator (index, xmlItem) {
     rank : Number($(xmlItem).find("rank").attr('value')),
   };
 
+  //not all games have had enough users play them to have poll results.  This puts in an (admittedly arbitrary) number as the value when that's the case.
   pollResult = findPollScore(game.playerPollResults, Number($('#player-number').val()));
   if (isNaN(pollResult)) {
     game.pollValue = .4;
@@ -171,7 +179,8 @@ function newGameObjectCreator (index, xmlItem) {
 
 
 function gameObjectCreator (index, xmlItem) {
-  //get individual xml item and create object
+  //get individual xml item and create game object.  This is for the first pass of a user's collection.  Name isn't necessary, but was useful for debugging.
+  //the others are useful for filtering out games before the second ajax call.
   let game= {
     gameId: $(xmlItem).attr("objectid"),
     name: $(xmlItem).find('name').text(),
@@ -186,6 +195,7 @@ function gameObjectCreator (index, xmlItem) {
 
 
 function getSortedObjects (xmlData, mapFunction, filter) {
+  //this takes in xmlData from the ajax call and turns it into a filtered and sorted array.
   let $items = $(xmlData).find('items');
   let gameObjectList = $items.children().map(mapFunction);
   //gameObjectList is an object and needs to be an array to filter
@@ -203,6 +213,7 @@ function getSortedObjects (xmlData, mapFunction, filter) {
 
 
 function watchSubmit () {
+  //watches for the form submit, preforms and ajax call on a bgg user's collection.
   $('#query-form').submit(event => {
     event.preventDefault();
     weightFilter = Number($('#diff-level').val());
@@ -222,7 +233,7 @@ function watchSubmit () {
       diffLevelParameter: $('#diff-level').val(),
     }).done(function(data) {
       getMoreGameInfo( getSortedObjects(data, gameObjectCreator, true) )
-    }).fail(gameFailureCallback)
+    }).fail(failureCallback)
   });
 }
 
@@ -230,10 +241,12 @@ function watchSubmit () {
 
 
 function watchVideoClick () {
+  //looks for click on the video tab, searches youtube for a rules video with that boardgame name.  Displays the first result.
   $('.results-list').on('click', '.videoTab', function() {
     event.stopPropagation;
     let gameName = $(this).closest('li').find('img').attr('alt');
     let gameSearch = gameName + " board game" + " rules";
+    console.log(gameSearch);
     let vidLocation = $(this).closest('li').find('.Video');
     if(vidLocation.children().length == 0) {
       $.ajax({
@@ -257,6 +270,7 @@ function watchVideoClick () {
 
 
 function displayFullDescription () {
+  //opens and closes longer description of each game.
   $('.results-list').on('click','.desc-button', function() {
     if($(this).text()==="Full Description") {
       $(this).closest('li').find('.game-description.short').prop("hidden", true);
@@ -273,6 +287,7 @@ function displayFullDescription () {
 
 
 function watchSlider () {
+  //update for range slider display values as they move
   let sliders = document.getElementsByClassName('slider')
   for (i=0; i< sliders.length; i++) {
     sliders[i].addEventListener("input", function(event) {
@@ -289,6 +304,7 @@ function watchSlider () {
 
 
 function watchTabs() {
+  //watches for clicks on the game Description, Rules, or Video tabs and displays content.
   $('.results-list').on('click', '.tablinks', function(event){
     // Get all elements with class="tabcontent" and hide them
     $(this).closest('li').find('.tabcontent').prop("hidden", true);
@@ -308,6 +324,7 @@ function watchTabs() {
 
 
 $(document).on({
+  //displays "loading" gif after form submission, removes ability to resubmit form until after results return.
     ajaxStart: function() { 
       $(".loading").prop("hidden", false);
       $('button[type="submit"]').prop("disabled", true);
