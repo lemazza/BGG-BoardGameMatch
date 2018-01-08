@@ -1,19 +1,31 @@
+/*
+some colors i'm using
+
+red = #c02315
+brown = #2b1001
+*/
+
+
 * {
   box-sizing: border-box;
 }
 
 body {
+  background-image:  
+    linear-gradient(rgba(192, 35, 21, 0.8), rgba(192, 35, 21, 0.8)), 
+    url('images/BoardGames.jpg');
   background-color: #c02315;
+  background-size: 100% auto;
   min-width: 320px;
 }
 
-.results-container{
-  background-color: white;
-}
-
 .results-container {
-  border: 10px solid grey;
-  border-top: none;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  margin-bottom: 5px;
+  background-color: white;
+  border: 5px solid grey;
+  border-style: ridge;
 }
 
 
@@ -24,21 +36,45 @@ Header Style
 
 ==================================================================
 */
+.head-blur {
+  background-image:  
+    linear-gradient(rgba(192, 35, 21, 0.8), rgba(192, 35, 21, 0.8)), 
+    url('images/BoardGames.jpg'); 
+  background-position: left -85px;
+  z-index: -1;
+  filter: blur(10px);
+  max-width: 1000px;
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
+  left: 0px;
+}
 
 header {
-  font-family: 'Lato', sans-serif;
+  font-family: 'Vollkorn SC', serif;
+  text-shadow: 4px 3px 3px black;
+  position: relative;
   color: white;
   font-size: 30px;
-  border: 10px solid grey;
+  border: 5px solid grey;
+  border-style: ridge;
+  overflow: hidden;
+  max-width: 1000px;
+  margin: 10px auto;
 }
+
 header p {
   font-size: 20px;
   margin-top: 5px;
+  text-align: center;
 }
 
 h1 {
+  font-weight: 200;
   margin-top: 5px;
   margin-bottom: 5px;
+  text-align: center;
 }
 
 
@@ -53,14 +89,18 @@ Form Style #732919
 ==================================================================
 */
 form {
+  background-image:  
+    linear-gradient(rgba(43, 16, 1, 0.9), rgba(43, 16, 1, 0.9)), 
+    url('images/wood-grain.jpg');
   background-color: #2b1001;
-  border: 10px solid grey;
-  border-top: none;
+  border: 5px solid grey;
+  border-style: ridge;
   font-family: 'Lato', sans-serif;
   color: white;
   font-size: 20px;
   font-weight: 400;
-
+  margin-top: 10px;
+  margin-bottom: 10px;
   padding: 10px;
 }
 
@@ -73,7 +113,10 @@ label, button[type="submit"] {
   font-weight: bold;
 }
 
-
+.row#query-form {
+  max-width: 480px;
+  marin: 10px auto;
+}
 
 
 

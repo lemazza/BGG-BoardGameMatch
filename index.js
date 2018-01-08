@@ -323,6 +323,18 @@ function watchTabs() {
   });
 }
 
+function watchTopGames () {
+  $.ajax({
+    url: 'https://www.boardgamegeek.com/browse/boardgame/',
+    type: "GET",
+    dataType: "jsonp",
+    success: function (data) {
+      console.log(data);
+    },
+  });
+
+}
+
 
 
 $(document).on({
@@ -337,6 +349,8 @@ $(document).on({
     }    
 });
 
+
+$(watchTopGames);
 $(watchTabs);
 $(watchSlider);
 $(watchSubmit);

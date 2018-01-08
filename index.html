@@ -9,17 +9,20 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.1.1/normalize.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Vollkorn+SC" rel="stylesheet">
   <link rel="stylesheet" href="grid.css">
   <link rel="stylesheet" href="main.css">
 </head>
 <body>
-  <header class="row">
-    <h1>Game Selector</h1>
+ 
+  <header>
+    <div class="head-blur"></div>
+    <h1>Board Game Match</h1>
     <p>search a collection to decide what game to play</p>
   </header>
   <main>
     <form id="query-form" class="row">
-      <label for="bgg-user">Board Game Geek User Name</label>
+      <label for="bgg-user">Board Game Geek User Name</label><br>
       <input type="text" id="bgg-user" value="lemazza" required><br>
 
       <label for="player-number">Number of Players: <span id="num-label" class="slider-output">2</span></label><br>
