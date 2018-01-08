@@ -325,9 +325,9 @@ function watchTabs() {
 
 function watchTopGames () {
   $.ajax({
-    url: 'https://www.boardgamegeek.com/browse/boardgame/',
+    url: 'cors-anywhere.herokuapp.com/https://www.boardgamegeek.com/browse/boardgame/',
     type: "GET",
-    dataType: "jsonp",
+    dataType: "html",
     success: function (data) {
       console.log(data);
     },
