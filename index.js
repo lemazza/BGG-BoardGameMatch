@@ -6,7 +6,7 @@ function failureCallback(xhr, statusText, errorThrown ) {
   console.log('here is xhr:', xhr);
   console.log('here is errorThrown:', errorThrown );
   if (statusText === "error") {
-    $('.results-title').text("Error retrieving data from Boardgamegeek.com.  Try again in a moment.")
+    $('#results-title').text("Error retrieving data from Boardgamegeek.com.  Try again in a moment.")
     if (this.tryCount <= this.retryLimit) {
         //try again
         $.ajax(this);
@@ -26,28 +26,32 @@ function failureCallback(xhr, statusText, errorThrown ) {
 function renderResult (item) { 
 return `
   <li class="game-item" aria-labelledby="game-${item.gameId}" aria-describedby="desc-${item.gameId}">
-    <h3 id="game-${item.gameId}" class="game-name" data-game-id="${item.gameId}">${item.name}</h3>
-    <p class="year-designer"><span class="game-year">(${item.year})</span> <span class="game-designer">${item.designer}<span></p>
+    <header>
+      <h3 id="game-${item.gameId}" class="game-name" data-game-id="${item.gameId}">${item.name}</h3>
+      <p class="year-designer"><span class="game-year">(${item.year})</span> <span class="game-designer">${item.designer}<span></p>
+    </header>
+
     <div class="thumb-box">
       <img class="game-thumb" src="${item.thumbnail}" alt="${item.name}">
     </div>
-    
-      <div class="tab">
-        <button class="tablinks active")">Description</button>
-        <button class="tablinks videoTab" )">Video</button>
-        <button class="tablinks")">Stats</button>
-      </div>
+
     <div class="game-info-box">
-      <div id="desc-${item.gameId}" class="Description tabcontent">
+      <div role="tablist" class="tab">
+        <button role="tab" class="tablinks active")">Description</button>
+        <button role="tab" class="tablinks videoTab" )">Video</button>
+        <button role="tab" class="tablinks")">Stats</button>
+      </div>
+
+      <div role="tabpanel" id="desc-${item.gameId}" class="Description tabcontent">
         <p class="game-description short" >${item.shortDescription}</p>
         <p class="game-description full" hidden>${item.description}</p>
         <button class="desc-button">Full Description</button>
       </div>
 
-      <div class="Video tabcontent">
+      <div role="tabpanel" class="Video tabcontent">
       </div>
 
-      <div class="Stats tabcontent">
+      <div role="tabpanel" class="Stats tabcontent">
         <ul>
           <li><span class="stat-type">BGG Rank:</span> ${item.rank}</li>
           <li><span class="stat-type">Recommendation score:</span> ${(item.bayesAve*(2+item.pollValue)*100/24).toFixed(1)}</li>
@@ -74,7 +78,7 @@ function displayResults(collection) {
   } else {
     var resultsHeading = "Results Found:"
   };
-  $('.results-title').text(`${collection.length} ${resultsHeading}`);
+  $('#results-title').text(`${collection.length} ${resultsHeading}`);
   //clicks each description tab to make those the first to display
   var descriptionsToClick = document.getElementsByClassName("active")
   for (i = 0; i < descriptionsToClick.length; i++) {
@@ -106,7 +110,10 @@ function filterWithNewInfo (collectionArray) {
 function getMoreGameInfo (array) {
   //given a gameId, this function searches for that "thing" and returns its 
   //description, weight, player poll results, and other descriptive information not found in the collectoin api
+  $('#results-title').text(`Retrieving more game information`)
+  console.log(array);
   let idArray = array.map(x=>x.gameId);
+  console.log(idArray);
   DisplayCollection = [];
   let settingsObject = {
       url: `https://www.boardgamegeek.com/xmlapi2/thing`,
@@ -196,6 +203,7 @@ function gameObjectCreator (index, xmlItem) {
 
 function getSortedObjects (xmlData, mapFunction, filter) {
   //this takes in xmlData from the ajax call and turns it into a filtered and sorted array.
+  $('#results-title').text(`Sorting collection for display`)
   let $items = $(xmlData).find('items');
   let gameObjectList = $items.children().map(mapFunction);
   //gameObjectList is an object and needs to be an array to filter
@@ -219,23 +227,31 @@ function watchSubmit () {
   $('#query-form').submit(event => {
     event.preventDefault();
     weightFilter = Number($('#diff-level').val());
-    $('.results-title').text("Finding Games");
+    let searchType = $('input[name="searchType"]:checked').val()
+    $('#results-title').text("Finding Games").focus();
     $('.results-list').html("");
-    $.ajax({
-      url: 'https://www.boardgamegeek.com/xmlapi2/collection',
-      type: "GET",
-      dataType: "xml",
-      data: {
-        username: $('#bgg-user').val(),
-        stats: 1,
-        own: 1
-        },
-      maxTimeParameter: $('#playtime').val(),
-      playerNumParameter: $('#player-number').val(),
-      diffLevelParameter: $('#diff-level').val(),
-    }).done(function(data) {
-      getMoreGameInfo( getSortedObjects(data, gameObjectCreator, true) )
-    }).fail(failureCallback)
+
+    if (searchType != "topGames") {  
+      $.ajax({
+        url: 'https://www.boardgamegeek.com/xmlapi2/collection',
+        type: "GET",
+        dataType: "xml",
+        data: {
+          username: $('#bgg-user').val(),
+          stats: 1,
+          own: 1
+          },
+        maxTimeParameter: $('#playtime').val(),
+        playerNumParameter: $('#player-number').val(),
+        diffLevelParameter: $('#diff-level').val(),
+      }).done(function(data) {
+        getMoreGameInfo( getSortedObjects(data, gameObjectCreator, true) )
+      }).fail(failureCallback)
+    } else if (topGameIDs.length>0) {
+      getMoreGameInfo(topGameIDs);
+    } else {
+      getTopGames();
+    }
   });
 }
 
@@ -248,7 +264,6 @@ function watchVideoClick () {
     event.stopPropagation;
     let gameName = $(this).closest('li').find('img').attr('alt');
     let gameSearch = gameName + " board game" + " rules";
-    console.log(gameSearch);
     let vidLocation = $(this).closest('li').find('.Video');
     if(vidLocation.children().length == 0) {
       $.ajax({
@@ -323,16 +338,40 @@ function watchTabs() {
   });
 }
 
-function watchTopGames () {
-  $.ajax({
-    url: 'cors-anywhere.herokuapp.com/https://www.boardgamegeek.com/browse/boardgame/',
+const topGameIDs = [];
+
+function parseBGGPage (site) {
+  return $.ajax({
+    url: 'https://cors-anywhere.herokuapp.com/' + site,
     type: "GET",
     dataType: "html",
     success: function (data) {
-      console.log(data);
+      const bggPage = $('<div></div>');
+      bggPage.html(data);
+      const bggAnchors = bggPage.find('[id*="results_objectname"]').children('a');
+      $.each(bggAnchors, function(index, elem){
+        let hrefElement = String(elem);
+        let slashIndex = hrefElement.indexOf('/', 21);
+        let bggGameId = hrefElement.slice(21, slashIndex);
+        let gameObj = {gameId: bggGameId}
+        topGameIDs.push(gameObj);
+      });
+     $('#results-title').text(`Collecting Games: ${topGameIDs.length/5}%`)
+
     },
   });
 
+}
+
+function getTopGames () {
+  let promiseArray = []
+  for (let i = 1; i<= 5; i++){
+    let ajaxCall = parseBGGPage('https://www.boardgamegeek.com/browse/boardgame/page/' + i)
+    promiseArray.push(ajaxCall);
+  }
+  Promise.all(promiseArray).then(function() {
+    getMoreGameInfo(topGameIDs);
+  });
 }
 
 
@@ -350,7 +389,7 @@ $(document).on({
 });
 
 
-$(watchTopGames);
+//$(watchTopGames);
 $(watchTabs);
 $(watchSlider);
 $(watchSubmit);

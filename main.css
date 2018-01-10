@@ -51,7 +51,7 @@ Header Style
   left: 0px;
 }
 
-header {
+#main-header {
   font-family: 'Vollkorn SC', serif;
   text-shadow: 4px 3px 3px black;
   position: relative;
@@ -64,7 +64,7 @@ header {
   margin: 10px auto;
 }
 
-header p {
+#main-header p {
   font-size: 20px;
   margin-top: 5px;
   text-align: center;
@@ -114,10 +114,32 @@ label, button[type="submit"] {
 }
 
 .row#query-form {
-  max-width: 480px;
-  marin: 10px auto;
+  max-width: 600px;
 }
 
+#bgg-user {
+  margin-left: 15px;
+  margin-top: 5px;
+}
+
+/*  SLIDERS */
+
+.slider {
+  width: 80%;
+  height: 5px;   
+}
+
+.range-labels {
+  padding: 0;
+  list-style: none;
+}
+
+.range-labels li {
+  float: left;
+  width: 20%;
+  text-align: center;
+  font-size: 14px;
+}
 
 
 
@@ -209,7 +231,7 @@ h3.game-name {
 
 .thumb-box {
   float: left;
-  width: 150px;
+  width: 400px;
   height: 150px;
 }
 
@@ -223,7 +245,6 @@ h3.game-name {
 .game-info-box {
   min-width: 280px;
   clear: both;
-  border-top: 1px solid #ccc;
 }
 
 .Stats li {
@@ -235,10 +256,11 @@ h3.game-name {
   font-weight: bold;
 }
 
-@media only screen and (min-width: 680px) {
+@media only screen and (min-width: 450px) {
 
-  .game-info-box, .tab{
-    margin-left: 160px;
+  .thumb-box {
+    border: none;
+    width:150px;
   }
 
   .game-info-box {

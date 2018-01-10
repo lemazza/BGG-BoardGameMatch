@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Board Game Selector</title>
+  <title>Board Game Match</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="choose the right game from a collection">
@@ -15,57 +15,78 @@
 </head>
 <body>
  
-  <header>
+  <header id="main-header">
     <div class="head-blur"></div>
     <h1>Board Game Match</h1>
     <p>search a collection to decide what game to play</p>
   </header>
   <main>
     <form id="query-form" class="row">
-      <label for="bgg-user">Board Game Geek User Name</label><br>
-      <input type="text" id="bgg-user" value="lemazza" required><br>
+      <fieldset>
+        <legend>How would you like to search?</legend>
+        <input type="radio" id="type-topGames" name="searchType" value="topGames" checked>
+        <label for="type-topGames">Search Top 500 Games on BoardGameGeek.com</label><br>
 
-      <label for="player-number">Number of Players: <span id="num-label" class="slider-output">2</span></label><br>
-      <input type="range" min="1" max="12" value="2" class="slider" id="player-number" value="6" list="player-ticks" aria-labelledby="num-label">
-        <datalist id="player-ticks">
-          <option>1</option>
-          <option>2</option>
-          <option>3</option>
-          <option>4</option>
-          <option>5</option>
-          <option>6</option>
-          <option>7</option>
-          <option>8</option>
-          <option>9</option>
-          <option>10</option>
-          <option>11</option>
-          <option>12</option>
-        </datalist><br>
 
-      <label for="diff-level">Difficulty Level: <span id="diff-label" class="slider-output">1.3</span></label><br>
-      <input type="range" min="1" max="4" value="1.3" step=".1" class="slider" id="diff-level" list="diff-ticks" aria-labelledby="diff-label">
-        <datalist id="diff-ticks">
-          <option>1</option>
-          <option>2</option>
-          <option>3</option>
-          <option>4</option>
-        </datalist><br>
+        <input type="radio" id="type-userName" name="searchType">
+        <label for="type-userName">Search by BoardGameGeek user name:</label><br>
+        <input type="text" id="bgg-user" name="searchType" placeholder="enter user name here"><br>
+        
 
-      <label for="playtime" >Max Game Length in Minutes: <span id="time-label" class="slider-output">30</span></label><br>
-      <input type="range" min="15" max="240" step="15" class="slider" list="time-ticks" id="playtime" value="30" aria-labelledby="time-label"><br>
-        <datalist id="time-ticks">
-          <option>15</option>
-          <option>60</option>
-          <option>120</option>
-          <option>180</option>
-          <option>240</option>
-        </datalist><br>
+        
+        
+      </fieldset>
+      <fieldset>
+        <legend>Define search parameters</legend>
+
+        <label for="player-number">Number of Players: <span id="num-label" class="slider-output">2</span></label><br>
+        <input type="range" min="1" max="12" value="2" class="slider" id="player-number" value="6" list="player-ticks" aria-labelledby="num-label">
+          <datalist id="player-ticks">
+            <option>1</option>
+            <option>2</option>
+            <option>3</option>
+            <option>4</option>
+            <option>5</option>
+            <option>6</option>
+            <option>7</option>
+            <option>8</option>
+            <option>9</option>
+            <option>10</option>
+            <option>11</option>
+            <option>12</option>
+          </datalist><br>
+
+        <label for="diff-level">Difficulty Level: <span id="diff-label" class="slider-output">1.3</span></label><br>
+        <input type="range" min="1" max="4" value="1.3" step=".1" class="slider" id="diff-level" list="diff-ticks" aria-labelledby="diff-label">
+        <ul class="range-labels">
+          <li>1</li>
+          <li>2</li>
+          <li>3</li>
+          <li>4</li>
+        </ul>
+        <!--  <datalist id="diff-ticks">
+            <option>1</option>
+            <option>2</option>
+            <option>3</option>
+            <option>4</option>
+          </datalist><br>  -->
+
+        <label for="playtime" >Max Game Length in Minutes: <span id="time-label" class="slider-output">30</span></label><br>
+        <input type="range" min="15" max="240" step="15" class="slider" list="time-ticks" id="playtime" value="30" aria-labelledby="time-label"><br>
+          <datalist id="time-ticks">
+            <option>15</option>
+            <option>60</option>
+            <option>120</option>
+            <option>180</option>
+            <option>240</option>
+          </datalist><br>
+      </fieldset>
 
       <button type="submit">Submit</button>
     </form>
 
     <section class="results-container row">
-      <h2 class="results-title" aria-live="assertive">Results:</h2>
+      <h2 id="results-title" tabindex="0" aria-live="assertive">Results:</h2>
       <div class="loading" hidden>
         <img class="loading-img" src="images/786.gif" alt="page loading sand timer">
       </div>
