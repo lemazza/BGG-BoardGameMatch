@@ -52,14 +52,25 @@ return `
       </div>
 
       <div role="tabpanel" class="Stats tabcontent">
-        <ul>
-          <li><span class="stat-type">BGG Rank:</span> ${item.rank}</li>
-          <li><span class="stat-type">Recommendation score:</span> ${(item.bayesAve*(2+item.pollValue)*100/24).toFixed(1)}</li>
-          <li><span class="stat-type">Recommendation %:</span> ${(item.pollValue*100).toFixed(1)}</li>
-          <li><span class="stat-type">Difficulty Level:</span> ${(item.weight).toFixed(2)}</li>
-          <li><span class="stat-type">Player Count:</span> ${item.minPlayers} - ${item.maxPlayers}</li>
-          <li><span class="stat-type">Playing Time:</span> ${item.playTime} minutes</li>
-        </ul>
+        <dl>
+          <dt>BGG Rank:</dt>
+          <dd> ${item.rank}</dd>
+
+          <dt>Recommendation score:</dt> 
+          <dd>${(item.bayesAve*(2+item.pollValue)*100/24).toFixed(1)}</dd>
+
+          <dt>Recommendation %:</dt>
+          <dd>${(item.pollValue*100).toFixed(1)}</dd>
+
+          <dt>Difficulty Level:</dt>
+          <dd>${(item.weight).toFixed(2)}</dd>
+
+          <dt>Player Count:</dt>
+          <dd>${item.minPlayers} - ${item.maxPlayers}</dd>
+
+          <dt>Playing Time:</dt> 
+          <dd>${item.playTime} minutes</dd>
+        </dl>
       </div>
     </div>
   </li>
@@ -113,7 +124,7 @@ function getMoreGameInfo (array) {
   $('#results-title').text(`Retrieving more game information`)
   console.log(array);
   let idArray = array.map(x=>x.gameId);
-  console.log(idArray);
+  console.log('idArray is', idArray);
   DisplayCollection = [];
   let settingsObject = {
       url: `https://www.boardgamegeek.com/xmlapi2/thing`,
@@ -125,6 +136,7 @@ function getMoreGameInfo (array) {
         videos: 1
       },
       success: function(data){
+        console.log('success data', data);
         displayResults( getSortedObjects(data, newGameObjectCreator, false) );
       },
       error: failureCallback
@@ -203,8 +215,10 @@ function gameObjectCreator (index, xmlItem) {
 
 function getSortedObjects (xmlData, mapFunction, filter) {
   //this takes in xmlData from the ajax call and turns it into a filtered and sorted array.
+  console.log(xmlData);
   $('#results-title').text(`Sorting collection for display`)
   let $items = $(xmlData).find('items');
+  console.log('items are', $items);
   let gameObjectList = $items.children().map(mapFunction);
   //gameObjectList is an object and needs to be an array to filter
   var newArray = $.map(gameObjectList, function(value, index) {return [value]});
@@ -221,6 +235,32 @@ function getSortedObjects (xmlData, mapFunction, filter) {
 }
 
 
+function newSearch() {
+  $('#newSearch').click(event =>{
+    console.log('it works');
+    $('form').prop('hidden', false);
+    $('#search-summary').prop('hidden', true)
+  })
+}
+
+
+
+function formCollapse() {
+  $('#query-form').submit(event =>{
+    event.preventDefault();
+    $('form').prop('hidden', true);
+    let collectionName = "Top 500 Games"
+    let searchType = $('input[name="searchType"]:checked').val()
+    if (searchType != "topGames") {
+      collectionName = $('#bgg-user').val() + "'s collection"
+    }
+    $('#search-summary').prop('hidden', false)
+    $('#search-summary p').html(`Searching <strong>${collectionName}</strong> for <strong>${$('#player-number').val()} player</strong> games with a <strong>${$('#diff-level').val()} difficulty</strong> and maximum length of <strong>${$('#playtime').val()} minutes</strong>`);
+    newSearch();
+  })
+}
+
+
 
 function watchSubmit () {
   //watches for the form submit, preforms and ajax call on a bgg user's collection.
@@ -230,7 +270,6 @@ function watchSubmit () {
     let searchType = $('input[name="searchType"]:checked').val()
     $('#results-title').text("Finding Games").focus();
     $('.results-list').html("");
-
     if (searchType != "topGames") {  
       $.ajax({
         url: 'https://www.boardgamegeek.com/xmlapi2/collection',
@@ -363,6 +402,8 @@ function parseBGGPage (site) {
 
 }
 
+
+
 function getTopGames () {
   let promiseArray = []
   for (let i = 1; i<= 5; i++){
@@ -390,6 +431,7 @@ $(document).on({
 
 
 //$(watchTopGames);
+$(formCollapse);
 $(watchTabs);
 $(watchSlider);
 $(watchSubmit);

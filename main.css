@@ -88,7 +88,7 @@ Form Style #732919
 
 ==================================================================
 */
-form {
+form, #search-summary {
   background-image:  
     linear-gradient(rgba(43, 16, 1, 0.9), rgba(43, 16, 1, 0.9)), 
     url('images/wood-grain.jpg');
@@ -113,7 +113,7 @@ label, button[type="submit"] {
   font-weight: bold;
 }
 
-.row#query-form {
+#query-form, #search-summary {
   max-width: 600px;
 }
 
@@ -122,29 +122,84 @@ label, button[type="submit"] {
   margin-top: 5px;
 }
 
-/*  SLIDERS */
+#search-summary {
+  margin-right: auto;
+  margin-left: auto;
+}
+
+strong {
+  text-shadow: 4px 3px 3px black;
+  font-size: 25px;
+}
+
+/*  
+=============================================================
+
+SLIDERS 
+
+============================================================
+*/
 
 .slider {
-  width: 80%;
-  height: 5px;   
+  width: 75%;
+  height: 5px; 
+  margin: 0 12.5%;  
 }
 
 .range-labels {
   padding: 0;
   list-style: none;
+  margin: 0 auto;
 }
 
 .range-labels li {
   float: left;
-  width: 20%;
   text-align: center;
   font-size: 14px;
+  margin-top: -10px;
 }
 
 
+.player-range-label {
+  width: 8.333%;
+}
+
+.diff-range-label {
+  width: 14.2857%;
+
+}
+
+.time-range-label {
+  width: 6.25%;
+}
+
+.play-list {
+  width: 79%;
+}
+  
+.diff-list {
+  width: 84.2%;
+}
+  
+.time-list {
+  width: 77%;
+}
 
 
+@media only screen and (min-width: 640px) {
 
+  .play-list {
+    width: 79.6%;
+  }
+  
+  .diff-list {
+    width: 85.3%;
+  }
+  
+  .time-list {
+    width: 77.6%;
+  }
+}
 
 
 /*
@@ -231,8 +286,9 @@ h3.game-name {
 
 .thumb-box {
   float: left;
-  width: 400px;
+  width: 100%;
   height: 150px;
+  margin-bottom: 15px;
 }
 
 .game-thumb {
@@ -247,13 +303,13 @@ h3.game-name {
   clear: both;
 }
 
-.Stats li {
-  margin-top: 10px;
-  margin-bottom: 12px;
+dl {
+  width: 100%;
 }
 
-.stat-type {
-  font-weight: bold;
+dt dd {
+  float: left;
+  width: 50%;
 }
 
 @media only screen and (min-width: 450px) {
