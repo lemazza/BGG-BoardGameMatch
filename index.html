@@ -24,19 +24,21 @@
     <form id="query-form" class="row">
       <fieldset>
         <legend>How would you like to search?</legend>
-        <input type="radio" id="type-topGames" name="searchType" value="topGames" checked>
-        <label for="type-topGames">Search Top 500 Games on BoardGameGeek.com</label><br>
+        <label for="type-topGames">
+          <input type="radio" id="type-topGames" name="searchType" value="topGames" checked>
+          Search Top 1,000 Games on BoardGameGeek.com</label><br>
 
 
-        <input type="radio" id="type-userName" name="searchType">
-        <label for="type-userName">Search by BoardGameGeek user name:</label><br>
+        <label for="type-userName">
+          <input type="radio" id="type-userName" name="searchType">
+          Search by BoardGameGeek user name:</label><br>
         <input type="text" id="bgg-user" name="searchType" placeholder="enter user name here"><br>
         
 
         
         
       </fieldset>
-      <fieldset>
+      <fieldset id="sliders">
         <legend>Define search parameters</legend>
 
         <label for="player-number">Number of Players: <span id="num-label" class="slider-output">2</span></label><br>
