@@ -127,11 +127,34 @@ label, button[type="submit"] {
   margin-left: auto;
 }
 
-strong {
-  text-shadow: 4px 3px 3px black;
-  font-size: 25px;
+#search-summary p {
+  color: #ddd;
 }
 
+strong {
+  text-shadow: 4px 3px 3px black;
+  color: white;
+  font-weight: 600;
+  font-size: 25px;
+  letter-spacing: 1px;
+}
+
+#sliders label {
+  display: block;
+  text-align: center;
+  margin-bottom: -30px;
+}
+
+form button:hover, #search-summary button:hover {
+  background-color: #ccc;
+
+}
+
+form button:active, #search-summary button:active {
+  background-color: #666;
+  color: white;
+
+}
 /*  
 =============================================================
 
@@ -149,7 +172,7 @@ SLIDERS
 .range-labels {
   padding: 0;
   list-style: none;
-  margin: 0 auto;
+  margin: 0 auto 80px auto;
 }
 
 .range-labels li {
@@ -235,7 +258,7 @@ tab style
 }
 
 .tabcontent {
-    padding: 6px 12px;
+    padding: 5px 5px;
     border: 1px solid #ccc;
     border-top: none;
     overflow: hidden;
@@ -304,20 +327,24 @@ h3.game-name {
 }
 
 dl {
-  width: 100%;
+  max-width: 370px;
+  margin: 0 auto;
 }
 
 dt, dd {
-  float: left;
-  width: 50%;
   margin: 0;
   padding: 0;
   display: inline-block;
 }
 
 dt {
+  width: 170px;
   font-weight: bold;
+  text-align: right;
+  margin-right: 5%;
+  margin-bottom: 5px;
 }
+
 
 @media only screen and (min-width: 450px) {
 

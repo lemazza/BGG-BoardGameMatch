@@ -69,22 +69,22 @@ return `
       <div role="tabpanel" class="Stats tabcontent">
         <dl>
           <dt>BGG Rank:</dt>
-          <dd> ${item.rank}</dd>
+          <dd> ${item.rank}</dd><br>
 
-          <dt>Recommendation score:</dt> 
-          <dd>${(item.sortScore*100/24).toFixed(1)}</dd>
+          <dt>Rec Score:</dt> 
+          <dd>${(item.sortScore*100/24).toFixed(1)}</dd><br>
 
           <dt>Recommendation %:</dt>
-          <dd>${(item.pollValue*100).toFixed(1)}%</dd>
+          <dd>${(item.pollValue*100).toFixed(1)}%</dd><br>
 
           <dt>Difficulty Level:</dt>
-          <dd>${(item.weight).toFixed(2)}</dd>
+          <dd>${(item.weight).toFixed(2)}</dd><br>
 
           <dt>Player Count:</dt>
-          <dd>${item.minPlayers} - ${item.maxPlayers}</dd>
+          <dd>${item.minPlayers} - ${item.maxPlayers}</dd><br>
 
           <dt>Playing Time:</dt> 
-          <dd>${item.playTime} minutes</dd>
+          <dd>${item.playTime} min.</dd><br>
         </dl>
       </div>
     </div>
@@ -243,15 +243,15 @@ function newGameObjectCreator (index, xmlItem) {
 function gameObjectCreator (index, xmlItem) {
   //get individual xml item and create game object.  This is for the first pass of a user's collection.  Name isn't necessary, but was useful for debugging.
   //the others are useful for filtering out games before the second ajax call.
-  let game = $(xmlItem).attr("objectid")
-  /*let game= {
+  
+  game= {
     gameId: $(xmlItem).attr("objectid"),
     name: $(xmlItem).find('name').text(),
     minPlayers: Number($(xmlItem).find("stats").attr("minplayers")),
     maxPlayers: Number($(xmlItem).find("stats").attr("maxplayers")),
     playTime: Number($(xmlItem).find("stats").attr("playingtime")),
     rank: Number($(xmlItem).find("rank").attr('value')),
-  }*/
+  }
   return game;
 }
 
@@ -282,50 +282,54 @@ function getSortedObjects (xmlData, mapFunction, filter) {
 
 
 
-function assembleCollection (xmlData, bggUserName) {
-  let $items = $(xmlData).find('items');
-  let gameObjectList = $items.children().map(gameObjectCreator);
-//gameObjectList is an object and needs to be an array to filter
-  let newArray = $.map(gameObjectList, function(value, index) {return [value]});
-  console.log(xmlData);
+function assembleCollection (xmlData, bggUserName, boolean) {
+  $('#results-title').text("Retrieving Game Data")
+  let newArray = []
+  if (boolean) {
+    let $items = $(xmlData).find('items');
+    let gameObjectList = $items.children().map(gameObjectCreator);
+  //gameObjectList is an object and needs to be an array to filter
+    newArray = $.map(gameObjectList, function(value, index) {return [value]}); 
+    let userColl = new searchedCollection(bggUserName, newArray);
+    USERCOLLECTIONS.push(userColl);
+  } else {
+      newArray = xmlData;
+  }
+
+
   let existingGames = [];
   let lookupGames = [];
 
-  let userColl = new searchedCollection(bggUserName, newArray);
-  USERCOLLECTIONS.push(userColl);
-  console.log(USERCOLLECTIONS);
-
   newArray.forEach(x=>{
-    let fullInfo = ALLGAMES.find(y=>y.gameId === x);
+    let fullInfo = ALLGAMES.find(y=>y.gameId === x.gameId);
     if (fullInfo) {
-      console.log('it got this far')
       existingGames.push(fullInfo);
     } else {
       lookupGames.push(x);
     }
   })
-
-  console.log(lookupGames.length);
-
+  filteredGames = lookupGames.filter(x=>x.playTime <= timeFilter 
+                      && x.minPlayers <= playerFilter 
+                      && x.maxPlayers >= playerFilter 
+                      && x.rank > 0);
+  lookupIdArray = filteredGames.map(x=> x.gameId );
   let settingsObject = {
       url: `https://www.boardgamegeek.com/xmlapi2/thing`,
       type: "GET",
       dataType: "xml",
       data: {
-        id: lookupGames.join(','),
+        id: lookupIdArray.join(','),
         stats: 1
       },
       success: function(data){
-      console.log('data is', data);
+      $('#results-title').text("Sorting Games")
       let $items = $(data).find('items');
       let gameObjectList = $items.children().map(newGameObjectCreator);
       //gameObjectList is an object and needs to be an array to filter
       var newArray = $.map(gameObjectList, function(value, index) {return [value]});
-      console.log('lookup games values in new array', newArray);
       let allUserGames = existingGames.concat(newArray);
       ALLGAMES = ALLGAMES.concat(newArray);
 
-      console.log('lengths', allUserGames.length, ALLGAMES.length);
         //displayResults( getSortedObjects(data, newGameObjectCreator, false) );
 
       let filteredColl = newFilterer(allUserGames, playerFilter, weightFilter, timeFilter);
@@ -346,14 +350,13 @@ function newSorter (array, playerNum) {
   array.forEach(x=> {
     x.pollValue = x.pollResultArray[playerNum - 1];
     x.sortScore = x.bayesAve*(2+x.pollResultArray[playerNum - 1])
-    console.log(typeof x.sortScore)
   });
-  console.log(array);
   //array.sort((a,b)=>(b.bayesAve*(2+b.pollResultArray[playerNum-1]))-(a.bayesAve*(2+a.pollResultArray[playerNum-1])));
   array.sort(function(a,b) {return b.sortScore - a.sortScore});
-  console.log(array);
   return array;
 }
+
+
 
 function newSearch() {
   $('#newSearch').click(event =>{
@@ -379,6 +382,11 @@ function formCollapse() {
   })
 }
 
+function watchRadio () {
+  $('#bgg-user').change(event=>{
+    $('#type-userName').prop("checked", true);
+  })
+}
 
 
 function watchSubmit () {
@@ -402,18 +410,10 @@ function watchSubmit () {
     } else if (USERCOLLECTIONS.find(x=> x.username === bggUser)) {
       // if search is for a previously searched user collection, filter, sort and display that collection
       let currentColl = USERCOLLECTIONS.find(x=> x.username === bggUser).collection;
-      let fullCollection = [];
-
-      currentColl.forEach(x=>{
-        let fullInfo = ALLGAMES.find(y=>y.gameId === x);
-        fullCollection.push(fullInfo);
-      });
-
-      let filteredColl = newFilterer(fullCollection, playerFilter, weightFilter, timeFilter);
-      let sortedColl = newSorter( filteredColl, playerFilter);
-      displayResults( sortedColl );
+      assembleCollection(currentColl, bggUser, false);
     } else {
-      //else lookup the user collection  
+      //else lookup the user collection 
+      $('#results-title').text(`Finding ${bggUser}'s Collection`); 
       $.ajax({
         url: 'https://www.boardgamegeek.com/xmlapi2/collection',
         type: "GET",
@@ -427,7 +427,7 @@ function watchSubmit () {
         playerNumParameter: playerFilter,
         diffLevelParameter: weightFilter,
       }).done(function(data) {
-        assembleCollection(data, bggUser);
+        assembleCollection(data, bggUser, true);
         //getMoreGameInfo( getSortedObjects(data, gameObjectCreator, true) )
       }).fail(failureCallback)
     } 
@@ -449,6 +449,7 @@ function watchVideoClick () {
         url: "https://www.googleapis.com/youtube/v3/search",
         type: "GET",
         dataType: "json",
+        global: false,
         data: {
           q: gameSearch,
           part: 'snippet',
@@ -573,7 +574,7 @@ $(document).on({
     }    
 });
 
-
+$(watchRadio);
 $(formCollapse);
 $(watchTabs);
 $(watchSlider);
