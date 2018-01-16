@@ -349,6 +349,11 @@ dt, dd {
   display: inline-block;
 }
 
+dd:after {
+  display: block;
+  content: '';
+}
+
 dt {
   width: 170px;
   font-weight: bold;

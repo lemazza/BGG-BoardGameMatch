@@ -69,22 +69,22 @@ return `
       <div role="tabpanel" class="Stats tabcontent">
         <dl>
           <dt>BGG Rank:</dt>
-          <dd> ${item.rank}</dd><br>
+          <dd> ${item.rank}</dd>
 
           <dt>Rec Score:</dt> 
-          <dd>${(item.sortScore*100/24).toFixed(1)}</dd><br>
+          <dd>${(item.sortScore*100/24).toFixed(1)}</dd>
 
           <dt>Recommendation %:</dt>
-          <dd>${(item.pollValue*100).toFixed(1)}%</dd><br>
+          <dd>${(item.pollValue*100).toFixed(1)}%</dd>
 
           <dt>Difficulty Level:</dt>
-          <dd>${(item.weight).toFixed(2)}</dd><br>
+          <dd>${(item.weight).toFixed(2)}</dd>
 
           <dt>Player Count:</dt>
-          <dd>${item.minPlayers} - ${item.maxPlayers}</dd><br>
+          <dd>${item.minPlayers} - ${item.maxPlayers}</dd>
 
           <dt>Playing Time:</dt> 
-          <dd>${item.playTime} min.</dd><br>
+          <dd>${item.playTime} min.</dd>
         </dl>
       </div>
     </div>
@@ -405,8 +405,10 @@ function watchVideoClick () {
         },
         vidLocation: $(this).closest('li').find('.Video')
       }).done(function(data){
+        console.log(data.items[0])
+        let vidTitle = data.items[0].snippet.title;
         let vidAddress = data.items[0].id.videoId;
-        this.vidLocation.html(`<iframe width="420" height="315" src="https://www.youtube.com/embed/${vidAddress}"></iframe>`)
+        this.vidLocation.html(`<iframe width="420" height="315" title="${vidTitle}" src="https://www.youtube.com/embed/${vidAddress}"></iframe>`)
       })
     }
   });
