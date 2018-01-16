@@ -333,6 +333,10 @@ function watchRadio () {
   $('#bgg-user').change(event=>{
     $('#type-userName').prop("checked", true);
   })
+
+  $('label[for="bgg-user"]').click(event=>{
+    $('#type-userName').prop("checked", true);
+  })
 }
 
 
