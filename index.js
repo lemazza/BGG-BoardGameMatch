@@ -105,13 +105,6 @@ function displayResults(collection) {
     var resultsHeading = "Results Found:"
   };
 
-  $('.results-list').html("").append(results);
-
-  if(collection.length === 1){
-    var resultsHeading = "Result Found:"
-  } else {
-    var resultsHeading = "Results Found:"
-  };
   $('#results-title').text(`${collection.length} ${resultsHeading}`);
   //clicks each description tab to make those the first to display
   var descriptionsToClick = document.getElementsByClassName("active")
@@ -136,48 +129,6 @@ function newFilterer(collectionArray, playerFilter, weightFilter, timeFilter) {
 
 
 
-function filterByCollectionParameters (collectionArray, timeFilter, playerFilter) {
-  //filters the collection by number of players
-  return collectionArray.filter(x=>x.playTime <= timeFilter 
-                      && x.minPlayers <= playerFilter 
-                      && x.maxPlayers >= playerFilter 
-                      && x.rank > 0);
-};
-
-
-
-function filterWithNewInfo (collectionArray) {
-  //filters the collection array by game weight
-  weightMax = weightFilter + .3;
-  weightMin = weightFilter - .3;
-  return collectionArray.filter(x=>x.weight<= weightMax && x.weight>= weightMin);
-}
-
-
-
-function getMoreGameInfo (array) {
-  //given a gameId, this function searches for that "thing" and returns its 
-  //description, weight, player poll results, and other descriptive information not found in the collectoin api
-  $('#results-title').text(`Retrieving more game information`)
-  let idArray = array.map(x=>x.gameId);
-  let settingsObject = {
-      url: `https://www.boardgamegeek.com/xmlapi2/thing`,
-      type: "GET",
-      dataType: "xml",
-      data: {
-        id: idArray.join(','),
-        stats: 1
-      },
-      success: function(data){
-        displayResults( getSortedObjects(data, newGameObjectCreator, false) );
-      },
-      error: failureCallback
-  };
-  $.ajax(settingsObject)
-}
-
-
-
 function findPollScore (pollXml, playerNum) {
   // return % of positive results for how BGG users liked a game with (playerNum) many players
   let voteNode = $(pollXml[playerNum]).children();
@@ -188,6 +139,8 @@ function findPollScore (pollXml, playerNum) {
   if (percent === NaN) return 'Not enough votes'
   return percent;
 }
+
+
 
 function createPollArray (pollXml, maxPlayers) {
   let pollArray = []
@@ -257,32 +210,9 @@ function gameObjectCreator (index, xmlItem) {
 
 
 
-function getSortedObjects (xmlData, mapFunction, filter) {
-  //this takes in xmlData from the ajax call and turns it into a filtered and sorted array.
-  $('#results-title').text(`Sorting collection for display`)
-  let $items = $(xmlData).find('items');
-  let gameObjectList = $items.children().map(mapFunction);
-
-  //gameObjectList is an object and needs to be an array to filter
-  var newArray = $.map(gameObjectList, function(value, index) {return [value]});
-
-  //take next line out and uncommment the following one after creating topGamesArray
-  //let filteredCollection = newArray;
-  let filteredCollection = filter? filterByCollectionParameters(newArray,Number($('#playtime').val()),Number($('#player-number').val())) : filterWithNewInfo(newArray);
- 
-  if(filter) {
-    filteredCollection.sort((a,b)=>a.rank - b.rank);
-  } else {
-    //incorporates info from the player poll to sort and rank the games.  So, for instance..
-    // a highly rated game that happens to not be as fun for 2 players (Codenames for example) won't be highly recommended for 2 players.
-    filteredCollection.sort((a,b)=>(b.bayesAve*(2+b.pollValue))-(a.bayesAve*(2+a.pollValue)));
-  }
-  return filteredCollection;
-}
-
-
-
 function assembleCollection (xmlData, bggUserName, boolean) {
+  //this could probably use some more cleanup work.
+  //if boolean is true, xmlData is just that, if false its an array
   $('#results-title').text("Retrieving Game Data")
   let newArray = []
   if (boolean) {
@@ -300,6 +230,7 @@ function assembleCollection (xmlData, bggUserName, boolean) {
   let existingGames = [];
   let lookupGames = [];
 
+  //split newArray into an array of games we already have info on, and an array to get info on
   newArray.forEach(x=>{
     let fullInfo = ALLGAMES.find(y=>y.gameId === x.gameId);
     if (fullInfo) {
@@ -308,11 +239,14 @@ function assembleCollection (xmlData, bggUserName, boolean) {
       lookupGames.push(x);
     }
   })
+
+  //filter before making the ajax call
   filteredGames = lookupGames.filter(x=>x.playTime <= timeFilter 
                       && x.minPlayers <= playerFilter 
                       && x.maxPlayers >= playerFilter 
                       && x.rank > 0);
   lookupIdArray = filteredGames.map(x=> x.gameId );
+
   let settingsObject = {
       url: `https://www.boardgamegeek.com/xmlapi2/thing`,
       type: "GET",
@@ -327,10 +261,11 @@ function assembleCollection (xmlData, bggUserName, boolean) {
       let gameObjectList = $items.children().map(newGameObjectCreator);
       //gameObjectList is an object and needs to be an array to filter
       var newArray = $.map(gameObjectList, function(value, index) {return [value]});
+
+      //combine cached game info with newArray info to for allUserGames which will then be filtered, sorted, and displayed
+      //add newArray info to all games, caching more data for fewer or at least shorter ajax calls
       let allUserGames = existingGames.concat(newArray);
       ALLGAMES = ALLGAMES.concat(newArray);
-
-        //displayResults( getSortedObjects(data, newGameObjectCreator, false) );
 
       let filteredColl = newFilterer(allUserGames, playerFilter, weightFilter, timeFilter);
       let sortedColl = newSorter( filteredColl, playerFilter);
@@ -339,19 +274,19 @@ function assembleCollection (xmlData, bggUserName, boolean) {
       error: failureCallback
   };
   $.ajax(settingsObject)
-
-
-
 }
 
 
 
 function newSorter (array, playerNum) {
+  //adds sorting info to each game object so it can be displayed, then sorts the array by sortScore.
+  //The idea of sortScore is to include the poll result at a given player count as part of the score
+  // so, highly rated games that are bad for certain numbers of players are returned lower down the list. 
+  // For instance, Codenames can be played with 2 players, but is much less fun.
   array.forEach(x=> {
     x.pollValue = x.pollResultArray[playerNum - 1];
     x.sortScore = x.bayesAve*(2+x.pollResultArray[playerNum - 1])
   });
-  //array.sort((a,b)=>(b.bayesAve*(2+b.pollResultArray[playerNum-1]))-(a.bayesAve*(2+a.pollResultArray[playerNum-1])));
   array.sort(function(a,b) {return b.sortScore - a.sortScore});
   return array;
 }
@@ -359,6 +294,7 @@ function newSorter (array, playerNum) {
 
 
 function newSearch() {
+  // uncollapses form
   $('#newSearch').click(event =>{
     $('form').prop('hidden', false);
     $('#search-summary').prop('hidden', true)
@@ -368,6 +304,7 @@ function newSearch() {
 
 
 function formCollapse() {
+  //collapses form and displays search summary
   $('#query-form').submit(event =>{
     event.preventDefault();
     $('form').prop('hidden', true);
@@ -382,11 +319,22 @@ function formCollapse() {
   })
 }
 
+function toggleRequired () {
+  $('form').change(event=> {
+    if($('#type-userName').prop("checked")) {
+     $('#bgg-user').prop("required", true)
+     } else { $('#bgg-user').prop("required", false);
+   }
+  })
+}
+
 function watchRadio () {
+  // selects radio button associated with username when a change is made in that box
   $('#bgg-user').change(event=>{
     $('#type-userName').prop("checked", true);
   })
 }
+
 
 
 function watchSubmit () {
@@ -407,10 +355,12 @@ function watchSubmit () {
       let filteredColl = newFilterer(TOPGAMES, playerFilter, weightFilter, timeFilter);
       let sortedColl = newSorter( filteredColl, playerFilter);
       displayResults( sortedColl );
+
     } else if (USERCOLLECTIONS.find(x=> x.username === bggUser)) {
       // if search is for a previously searched user collection, filter, sort and display that collection
       let currentColl = USERCOLLECTIONS.find(x=> x.username === bggUser).collection;
       assembleCollection(currentColl, bggUser, false);
+
     } else {
       //else lookup the user collection 
       $('#results-title').text(`Finding ${bggUser}'s Collection`); 
@@ -428,12 +378,10 @@ function watchSubmit () {
         diffLevelParameter: weightFilter,
       }).done(function(data) {
         assembleCollection(data, bggUser, true);
-        //getMoreGameInfo( getSortedObjects(data, gameObjectCreator, true) )
       }).fail(failureCallback)
     } 
   });
 }
-
 
 
 
@@ -574,6 +522,8 @@ $(document).on({
     }    
 });
 
+
+$(toggleRequired);
 $(watchRadio);
 $(formCollapse);
 $(watchTabs);
