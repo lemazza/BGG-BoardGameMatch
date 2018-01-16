@@ -24,10 +24,10 @@ I've included a Top 1,000 games list to search from by default.  This is based o
 
 After submitting the form a list of games will be returned.  Each game has a description, some other descriptive information, and a video rules explanation, because its much easier to learn a game when it's taught by someone who's played it before.
 
-#Tech used
+# Tech used
 HTML, CSS, Javascript, jQuery.  With a special extra attention the use of ajax.
 
-#How it works
+# How it works
 
 After form submission, There are basically 3 options.  
 
