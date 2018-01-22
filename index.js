@@ -136,7 +136,7 @@ function findPollScore (pollXml, playerNum) {
   let recVotes = Number($(voteNode[1]).attr("numvotes"));
   let nrVotes = Number($(voteNode[2]).attr("numvotes"));
   let percent = (bestVotes+recVotes)/(bestVotes+recVotes+nrVotes);
-  if (percent === NaN) return 'Not enough votes'
+  if (isNaN(percent)) {percent = .1};
   return percent;
 }
 
@@ -345,6 +345,7 @@ function watchSubmit () {
   //watches for the form submit, preforms and ajax call on a bgg user's collection.
   $('#query-form').submit(event => {
     event.preventDefault();
+    console.log('submit happened');
     weightFilter = Number($('#diff-level').val());
     timeFilter = Number($('#playtime').val());
     playerFilter = Number($('#player-number').val());
